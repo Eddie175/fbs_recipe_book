@@ -88,95 +88,220 @@ function transitionCards(callback) {
 }
 
 /**
- * Modal open animation
+ * Modal open animation with blur effect
  */
 function animateModalOpen(modal, content) {
     if (!modal) return;
     
-    gsap.set(modal, { display: 'flex', opacity: 0 });
-    gsap.to(modal, { opacity: 1, duration: 0.3 });
-    document.body.classList.add('modal-open');
+    gsap.killTweensOf([modal, content]);
+    
+    // Ensure modal is properly sized for mobile with padding
+    if (window.innerWidth <= 768) {
+        gsap.set(modal, { 
+            display: 'flex',
+            opacity: 0,
+            visibility: 'visible',
+            height: '100%',
+            position: 'fixed',
+            overflow: 'hidden',
+            padding: '20px 0'  // Add vertical padding
+        });
+        
+        gsap.set(content, {
+            opacity: 0,
+            height: 'auto',
+            maxHeight: '92vh',  // Slightly reduced to ensure visibility
+            margin: '4vh 0',    // Percentage-based margins
+            borderRadius: '12px' // Keep border radius
+        });
+
+        // Show swipe hint only on mobile/tablet
+        if (!localStorage.getItem('modalHintShown')) {
+            const hint = document.createElement('div');
+            hint.className = 'modal-swipe-hint';
+            hint.innerHTML = `
+                <div class="hint-content" style="
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    background: ${document.documentElement.getAttribute('data-theme') === 'dark' 
+                        ? 'rgba(0, 0, 0, 0.65)' 
+                        : 'rgba(0, 0, 0, 0.75)'};
+                    backdrop-filter: blur(8px);
+                    color: white;
+                    padding: 8px 16px;
+                    border-radius: 20px;
+                    font-size: 14px;
+                    white-space: nowrap;
+                    box-shadow: ${document.documentElement.getAttribute('data-theme') === 'dark'
+                        ? '0 0 0 2px rgb(49, 130, 206), 0 0 20px rgba(49, 130, 206, 0.6), 0 0 40px rgba(49, 130, 206, 0.4)'
+                        : '0 2px 8px rgba(0, 0, 0, 0.25)'};
+                    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);">
+                    <span class="arrow" style="font-size: 18px; opacity: 0.95;">←</span>
+                    <span class="hint-text" style="font-weight: 500; letter-spacing: 0.02em;">Swipe between recipes</span>
+                    <span class="arrow" style="font-size: 18px; opacity: 0.95;">→</span>
+                </div>
+            `;
+            
+            modal.querySelector('.modal-content').appendChild(hint);
+            
+            gsap.set(hint, { 
+                opacity: 0,
+                position: 'absolute',
+                bottom: '10%',  // Changed from 33% to 25%
+                left: '50%',
+                xPercent: -50,
+                width: 'auto',
+                whiteSpace: 'nowrap',
+                zIndex: 1000
+            });
+
+            gsap.timeline()
+                .to(hint, {
+                    opacity: 1,
+                    duration: 0.5,
+                    ease: 'power1.inOut'
+                })
+                .to(hint, {
+                    opacity: 0,
+                    duration: 0.5,
+                    delay: 2.5,
+                    ease: 'power1.inOut',
+                    onComplete: () => hint.remove()
+                });
+            
+            localStorage.setItem('modalHintShown', 'true');
+        }
+    } else {
+        gsap.set(modal, { 
+            display: 'flex',
+            opacity: 0,
+            visibility: 'visible'
+        });
+        
+        gsap.set(content, {
+            opacity: 0
+        });
+    }
+    
+    gsap.set(modal, { 
+        display: 'flex',
+        opacity: 0,
+        visibility: 'visible'
+    });
+    
+    gsap.set(content, {
+        opacity: 0
+    });
+
+    const mainContent = document.querySelector('.cards-container');
+    if (mainContent) {
+        gsap.to(mainContent, {
+            filter: 'blur(5px)',
+            duration: 0.2
+        });
+    }
+
+    gsap.timeline()
+        .to(modal, {
+            opacity: 1,
+            duration: 0.2,
+            ease: 'none'
+        })
+        .to(content, {
+            opacity: 1,
+            duration: 0.2,
+            ease: 'none'
+        }, '-=0.1')
+        .call(() => document.body.classList.add('modal-open'));
 }
 
 /**
- * Modal close animation with proper blur cleanup
+ * Modal close animation maintaining blur until complete
  */
 function animateModalClose(modal, content) {
     if (!modal) return;
     
-    const mainContent = document.querySelector('.cards-container');
-    if (mainContent) gsap.to(mainContent, { filter: 'none', duration: 0.3 });
+    gsap.killTweensOf([modal, content]);
     
-    gsap.to(modal, { 
-        opacity: 0, 
-        duration: 0.3,
-        onComplete: () => {
-            gsap.set(modal, { display: 'none' });
-            document.body.classList.remove('modal-open');
-        }
-    });
+    const mainContent = document.querySelector('.cards-container');
+    
+    gsap.timeline()
+        .to(content, {
+            opacity: 0,
+            duration: 0.2,
+            ease: 'none'
+        })
+        .to(modal, {
+            opacity: 0,
+            duration: 0.2,
+            ease: 'none',
+            onComplete: () => {
+                gsap.set(modal, { 
+                    display: 'none',
+                    visibility: 'hidden'
+                });
+                document.body.classList.remove('modal-open');
+                // Remove blur last
+                if (mainContent) {
+                    gsap.to(mainContent, {
+                        filter: 'blur(0px)',
+                        duration: 0.2
+                    });
+                }
+            }
+        }, '-=0.1');
+    
+    // Reset hint state when modal closes
+    localStorage.removeItem('modalHintShown');
 }
 
 /**
- * Recipe navigation animations with proper blur handling
+ * Simplified recipe navigation with cross-fade
  */
 function animateNextRecipe(modal, content) {
     if (!modal || !content) return;
     
-    const timeline = gsap.timeline({
-        defaults: { ease: "power2.inOut" }
-    });
+    gsap.killTweensOf(content);
     
-    // Apply blur only to background content
-    const mainContent = document.querySelector('.cards-container');
-    if (mainContent) gsap.to(mainContent, { filter: 'blur(8px)', duration: 0.3 });
-    
-    timeline
+    gsap.timeline()
         .to(content, {
             opacity: 0,
-            x: '-30%',
-            duration: 0.4
-        })
-        .call(() => {
-            if (window.RecipeAnimations?.onNextRecipe) {
-                window.RecipeAnimations.onNextRecipe();
+            duration: 0.2,
+            ease: 'none',
+            onComplete: () => {
+                if (window.RecipeAnimations?.onNextRecipe) {
+                    window.RecipeAnimations.onNextRecipe();
+                }
             }
         })
-        .set(content, { x: '30%' })
         .to(content, {
             opacity: 1,
-            x: '0%',
-            duration: 0.4
+            duration: 0.2,
+            ease: 'none'
         });
 }
 
 function animatePrevRecipe(modal, content) {
     if (!modal || !content) return;
     
-    const timeline = gsap.timeline({
-        defaults: { ease: "power2.inOut" }
-    });
+    gsap.killTweensOf(content);
     
-    // Apply blur only to background content
-    const mainContent = document.querySelector('.cards-container');
-    if (mainContent) gsap.to(mainContent, { filter: 'blur(8px)', duration: 0.3 });
-    
-    timeline
+    gsap.timeline()
         .to(content, {
             opacity: 0,
-            x: '30%',
-            duration: 0.4
-        })
-        .call(() => {
-            if (window.RecipeAnimations?.onPrevRecipe) {
-                window.RecipeAnimations.onPrevRecipe();
+            duration: 0.2,
+            ease: 'none',
+            onComplete: () => {
+                if (window.RecipeAnimations?.onPrevRecipe) {
+                    window.RecipeAnimations.onPrevRecipe();
+                }
             }
         })
-        .set(content, { x: '-30%' })
         .to(content, {
             opacity: 1,
-            x: '0%',
-            duration: 0.4
+            duration: 0.2,
+            ease: 'none'
         });
 }
 

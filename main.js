@@ -162,7 +162,7 @@ const DOMManager = {
         printBtn.className = 'mobile-print-btn';
         printBtn.setAttribute('aria-label', 'Print recipe');
         printBtn.textContent = '🖨️';
-        printBtn.onclick = () => PrintHandler.printRecipe(AppState.currentRecipe);
+        printBtn.onclick = () => window.print();
 
         const buttonContainer = document.createElement('div');
         buttonContainer.className = 'modal-action-buttons';
@@ -366,6 +366,9 @@ const UI = {
     closeModal: function() {
         const modal = document.getElementById('recipeModal');
         if (!modal) return;
+
+        // Reset swipe hint state for next modal open
+        localStorage.removeItem('swipeHintShown');
 
         if (window.RecipeAnimations) {
             window.RecipeAnimations.animateModalClose(modal, modal.querySelector('.modal-content'));
@@ -817,23 +820,12 @@ const UI = {
             }
         });
 
-        // Print buttons
+        // Print button
         const printBtn = document.querySelector('.print-btn');
-        const mobilePrintBtn = document.querySelector('.mobile-print-btn');
-        
-        const handlePrint = function(e) {
-            e.preventDefault();
-            if (AppState.currentRecipe) {
-                PrintHandler.printRecipe(AppState.currentRecipe);
-            }
-        };
-
         if (printBtn) {
-            printBtn.addEventListener('click', handlePrint);
-        }
-        
-        if (mobilePrintBtn) {
-            mobilePrintBtn.addEventListener('click', handlePrint);
+            printBtn.addEventListener('click', function() {
+                window.print();
+            });
         }
 
         // Sort dropdown
