@@ -162,7 +162,7 @@ const DOMManager = {
         printBtn.className = 'mobile-print-btn';
         printBtn.setAttribute('aria-label', 'Print recipe');
         printBtn.textContent = '🖨️';
-        printBtn.onclick = () => window.print();
+        printBtn.onclick = () => PrintHandler.printRecipe(AppState.currentRecipe);
 
         const buttonContainer = document.createElement('div');
         buttonContainer.className = 'modal-action-buttons';
@@ -820,12 +820,23 @@ const UI = {
             }
         });
 
-        // Print button
+        // Print buttons
         const printBtn = document.querySelector('.print-btn');
+        const mobilePrintBtn = document.querySelector('.mobile-print-btn');
+        
+        const handlePrint = function(e) {
+            e.preventDefault();
+            if (AppState.currentRecipe) {
+                PrintHandler.printRecipe(AppState.currentRecipe);
+            }
+        };
+
         if (printBtn) {
-            printBtn.addEventListener('click', function() {
-                window.print();
-            });
+            printBtn.addEventListener('click', handlePrint);
+        }
+        
+        if (mobilePrintBtn) {
+            mobilePrintBtn.addEventListener('click', handlePrint);
         }
 
         // Sort dropdown
