@@ -1,4 +1,18 @@
 @media print {
+    /* Critical resets for mobile */
+    * {
+        -webkit-print-color-adjust: none !important;
+        print-color-adjust: none !important;
+        color-adjust: none !important;
+        forced-color-adjust: none !important;
+        background: none !important;
+        color: black !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+        filter: none !important;
+        -webkit-filter: none !important;
+    }
+
     /* Hide application UI */
     body > *:not(.print-content) {
         display: none !important;
@@ -16,9 +30,10 @@
         font-family: "Times New Roman", Times, serif;
         font-size: 11pt;
         line-height: 1.3;
-        color: black;
-        background: white;
+        color: black !important;
+        background: white !important;
         width: 100%;
+        -webkit-print-color-adjust: exact;
     }
 
     /* Print content container */
@@ -30,6 +45,7 @@
         max-width: none;
         margin: 0 auto;
         padding: 0;
+        background: none !important;
     }
 
     .print-content-inner {
