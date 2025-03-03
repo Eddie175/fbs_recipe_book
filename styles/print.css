@@ -1,16 +1,32 @@
 @media print {
-    /* Critical resets for mobile */
+    /* Critical resets for ALL devices */
     * {
         -webkit-print-color-adjust: none !important;
         print-color-adjust: none !important;
         color-adjust: none !important;
         forced-color-adjust: none !important;
-        background: none !important;
+        background: transparent !important;
         color: black !important;
         box-shadow: none !important;
         text-shadow: none !important;
         filter: none !important;
         -webkit-filter: none !important;
+        border: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Force removal of backgrounds */
+    html, 
+    body, 
+    body::after, 
+    body::before,
+    .print-content,
+    .print-content * {
+        background: none !important;
+        background-image: none !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
     }
 
     /* Hide application UI */
@@ -72,39 +88,196 @@
         break-after: auto;
     }
 
-    h2 {
-        font-size: 12pt;
-        font-weight: bold;
-        margin: 0.8cm 0 0.3cm 0;
-        page-break-after: avoid;
-        break-before: auto;
-        break-after: avoid;
+    /* Section headers */
+    h2, 
+    .ingredients-title,
+    .instructions-title {
+        font-size: 12pt !important;
+        font-weight: bold !important;
+        margin: 1cm 0 0.5cm 0 !important;
+        page-break-after: avoid !important;
     }
 
-    /* Lists */
-    .ingredients-list, 
+    /* Improved spacing for sections */
+    .ingredients-list,
     .instructions-list {
-        margin: 0.3cm 0;
-        padding-left: 1cm;
-        break-inside: avoid;
+        list-style: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
     }
-
-    li {
-        break-inside: avoid;
-        margin-bottom: 0.2cm;
-    }
-
-    /* Remove forced page break */
+    
+    /* Ingredient items with perfectly centered bullets */
     .ingredients-list {
-        break-after: auto;
-        margin-bottom: 1cm;
+        margin-bottom: 1.5cm !important;
+    }
+    
+    .ingredients-list li {
+        position: relative !important;
+        padding-left: 3cm !important;
+        margin-bottom: 0.5cm !important;
+        text-indent: 0 !important;
+        break-inside: avoid !important;
+        line-height: 1.5 !important;
+        min-height: 1.5em !important;
+        display: flex !important;
+        align-items: flex-start !important;
+    }
+    
+    .ingredients-list li::before {
+        content: "•" !important;
+        position: absolute !important;
+        left: 2cm !important;
+        top: 1em !important; /* Further down for better centering */
+        font-size: 1em !important;
+    }
+    
+    /* Instruction items with better centered numbers */
+    .instructions-list {
+        counter-reset: instructions !important;
+        margin-bottom: 1.5cm !important;
+    }
+    
+    .instructions-list li {
+        position: relative !important;
+        padding-left: 3cm !important;
+        margin-bottom: 0.8cm !important;
+        text-indent: 0 !important;
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+        display: flex !important;
+        align-items: flex-start !important;
+        line-height: 1.5 !important;
+        min-height: 1.5em !important;
+    }
+    
+    .instructions-list li::before {
+        counter-increment: instructions !important;
+        content: counter(instructions) "." !important;
+        position: absolute !important;
+        left: 2cm !important;
+        top: 1em !important; /* Further down for better centering */
+        font-weight: normal !important;
+        background: transparent !important;
+        color: black !important;
+        width: auto !important;
+        height: auto !important;
+        text-align: right !important;
+        margin-right: 0.5cm !important;
+        padding: 0 !important;
+        line-height: 1 !important;
+    }
+    
+    /* Stronger content protection rules */
+    @page {
+        size: auto;
+        margin: 2cm;
+        margin-bottom: 3cm; /* Extra bottom margin for safety */
+    }
+    
+    /* Extra space between pages */
+    .print-content {
+        margin-bottom: 2cm !important;
+    }
+    
+    /* Critical page break protection */
+    p, li, h1, h2, h3, h4, h5, h6 {
+        orphans: 4 !important; /* More lines at bottom of page */
+        widows: 4 !important;  /* More lines at top of page */
+    }
+    
+    /* Super-strong list item break handling */
+    li {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        break-after: auto !important;
+        break-before: auto !important;
+        margin-bottom: 0.8cm !important; /* Extra room between items */
+    }
+    
+    /* Ensure no content gets cut off */
+    .recipe-content,
+    .print-content,
+    .print-content-inner {
+        overflow: visible !important;
+        max-height: none !important;
+    }
+    
+    /* Buffer space at bottom of content areas */
+    .ingredients-list,
+    .instructions-list {
+        padding-bottom: 1cm !important;
+    }
+    
+    /* Multi-line item protection */
+    li p, 
+    li div, 
+    li span {
+        display: inline-block !important;
+        width: 100% !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+    
+    /* Completely remove any styled numbers/bullets */
+    .instructions-list li .step-number,
+    .instructions-list li span.number,
+    .instructions-list li .circle,
+    .instructions-list li .number,
+    .instructions-list li > span:first-child,
+    .instructions-list li > div:first-child,
+    .instructions-list li > *:first-child:not(p),
+    .instructions-list li [class*="circle"],
+    .instructions-list li [class*="step"],
+    .instructions-list li [class*="number"] {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        width: 0 !important;
+        height: 0 !important;
+        overflow: hidden !important;
+        position: absolute !important;
+        z-index: -9999 !important;
+    }
+    
+    /* Target all possible number styling */
+    [class*="circle"], 
+    [class*="step-number"],
+    [class*="number-"],
+    [class*="-number"],
+    .circle,
+    .step,
+    .number,
+    .step-circle,
+    .number-circle,
+    .numbered-circle,
+    .step-number,
+    li > .number,
+    li > span[class*="number"],
+    li > span[class*="step"],
+    li > div[class*="step"],
+    li > div[class*="number"] {
+        display: none !important;
+        visibility: hidden !important;
+        background: none !important;
+        color: transparent !important;
+        width: 0 !important;
+        height: 0 !important;
+        overflow: hidden !important;
+        position: absolute !important;
+        z-index: -9999 !important;
+    }
+    
+    /* Force all instruction numbers to be plain */
+    .instructions-list li {
+        list-style: decimal !important;
     }
 
-    /* Footer */
+    /* Properly style the footer */
     @page {
         @bottom-center {
             content: "FBS Employee Recipe Book | Page " counter(page);
             font-size: 9pt;
+            font-family: "Times New Roman", Times, serif;
         }
     }
 }
