@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="FBS Employee Recipe Book - A collection of favorite recipes from our team">
+    <title>FBS Employee Recipe Book</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Optimize font loading -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&family=Nunito:ital,wght@0,400;0,600;0,700;1,400&display=swap" as="style">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&family=Nunito:ital,wght@0,400;0,600;0,700;1,400&display=swap">
+    <!-- Add GSAP with defer for performance -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" defer></script>
+</head>
+<body>
+    <!-- Skip to content link for accessibility -->
+    <a href="#recipesContainer" class="skip-to-content">Skip to recipes</a>
+
+    <header>
+        <h1>FBS Employee Recipe Book</h1>
+        <p class="subtitle">A delicious compilation of our team's favorite recipes</p>
+    </header>
+
+    <!-- Theme toggle button -->
+    <button class="theme-toggle" id="themeToggle" title="Toggle dark mode" aria-label="Toggle dark mode">
+        🌙
+    </button>
+
+    <div class="search-container">
+        <input type="text" id="search" placeholder="Search recipes..." autocomplete="off" aria-label="Search recipes">
+        <button class="search-clear-btn" id="searchClear" aria-label="Clear search">✕</button>
+    </div>
+    
+    <div class="filter-container">
+        <button class="filter-btn active" data-category="all" data-emoji="📋" aria-pressed="true">All</button>
+        <button class="filter-btn" data-category="main" data-emoji="🍲" aria-pressed="false">Main</button>
+        <button class="filter-btn" data-category="dessert" data-emoji="🍰" aria-pressed="false">Dessert</button>
+        <button class="filter-btn" data-category="side" data-emoji="🥗" aria-pressed="false">Side</button>
+        <button class="filter-btn" data-category="breakfast" data-emoji="🍳" aria-pressed="false">Breakfast</button>
+        <button class="filter-btn" data-category="soup" data-emoji="🍜" aria-pressed="false">Soup</button>
+        <button class="filter-btn" data-category="drink" data-emoji="🍹" aria-pressed="false">Drink</button>
+    </div>
+    
+    <div class="sort-container">
+        <div class="sort-controls">
+            <label for="sort-select" class="sort-label">SORT BY</label>
+            <select id="sort-select" class="sort-select" aria-label="Sort recipes">
+                <option value="default">Default</option>
+                <option value="alpha-asc">Name (A-Z)</option>
+                <option value="alpha-desc">Name (Z-A)</option>
+                <option value="author">Author</option>
+                <option value="category">Category</option>
+            </select>
+        </div>
+        <label class="desktop-compact-toggle">
+            <input type="checkbox" id="desktopCompactToggle">
+            <span class="toggle-slider"></span>
+            <span class="toggle-label">Compact</span>
+        </label>
+    </div>
+    
+    <!-- Mobile sort interface -->
+    <div class="mobile-sort-interface">
+        <div class="mobile-sort-toggle">
+            <button class="mobile-sort-option active" data-sort="default">Default</button>
+            <button class="mobile-sort-option" data-sort="alpha-asc">A-Z</button>
+            <button class="mobile-sort-option" data-sort="alpha-desc">Z-A</button>
+            <button class="mobile-sort-option" data-sort="author">Author</button>
+        </div>
+    </div>
+
+    <div class="cards-container" id="recipesContainer">
+        <!-- Recipe cards will be generated here by JavaScript -->
+        <div aria-live="polite" id="loadingState" class="loading-state">
+            <span class="loading-spinner"></span>
+            <p>Loading recipes...</p>
+        </div>
+        <div id="noResultsContainer" class="no-results-wrapper" aria-live="polite"></div>
+    </div>
+    
+    <!-- Mobile Filter Panel -->
+    <div id="mobileFilterPanel" class="mobile-filter-panel" aria-labelledby="mobileFilterTitle">
+        <div class="panel-header">
+            <h3 id="mobileFilterTitle">Filters</h3>
+            <button class="panel-close-btn" aria-label="Close filter panel">×</button>
+        </div>
+        <div class="mobile-filter-options" id="mobileFilterOptions">
+            <!-- Mobile filters will be added here by JS -->
+        </div>
+        <div class="view-options">
+            <h4>View Options</h4>
+            <div class="toggle-group">
+                <label class="toggle-switch">
+                    <input type="checkbox" id="condensedViewToggle">
+                    <span class="toggle-slider"></span>
+                    <span class="toggle-label">Compact</span>
+                </label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="darkModeToggle">
+                    <span class="toggle-slider"></span>
+                    <span class="toggle-label">Dark Mode</span>
+                </label>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Mobile filter button -->
+    <button id="mobileFilterBtn" class="mobile-filter-btn" aria-label="Show filter options">
+        <span class="filter-icon">🔍</span>
+    </button>
+    
+    <div id="recipeModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="recipeModalTitle">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="recipeModalTitle">Recipe Title</h2>
+                <p class="modal-author">By Author Name</p>
+                <button class="close" aria-label="Close modal"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Recipe details will be filled here -->
+            </div>
+            <div class="modal-footer">
+                <button class="prev-btn" aria-label="Previous recipe">Previous Recipe</button>
+                <button class="print-btn" aria-label="Print recipe">Print Recipe</button>
+                <button class="next-btn" aria-label="Next recipe">Next Recipe</button>
+            </div>
+            <!-- Touch indicators for mobile swipe -->
+            <div class="touch-indicator touch-indicator-left" aria-hidden="true">
+                <span class="touch-indicator-icon">←</span>
+            </div>
+            <div class="touch-indicator touch-indicator-right" aria-hidden="true">
+                <span class="touch-indicator-icon">→</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load JavaScript files -->
+    <script src="recipeData.js"></script>
+    <script src="animations.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>
