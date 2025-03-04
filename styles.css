@@ -1,6 +1,29 @@
 @charset "UTF-8";
 
-/* ----- CSS Variables ----- */
+/**
+ * Recipe Collection App Styles
+ * A modern, responsive recipe display and management system with dark mode support
+ * 
+ * Table of Contents:
+ * 1. CSS Variables & Theming
+ * 2. Base & Global Styles
+ * 3. Layout & Structure
+ * 4. Header & Navigation
+ * 5. Search & Filter Components
+ * 6. Recipe Cards
+ * 7. Recipe Modal/Dialog
+ * 8. Interactive Components
+ * 9. Loading & State Indicators
+ * 10. Responsive Design (Media Queries)
+ * 11. Animations & Transitions
+ * 12. Accessibility & Print
+ */
+
+/*=================================
+  1. CSS Variables & Theming
+=================================*/
+
+/* Light theme (default) variables */
 :root {
     /* Colors */
     --primary: #0077d9;
@@ -38,9 +61,9 @@
     /* Transitions */
     --transition-normal: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     --transition-bounce: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        --card-transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1), 
-                            box-shadow 0.5s cubic-bezier(0.19, 1, 0.22, 1);
-    }
+    --card-transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1), 
+                        box-shadow 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+}
 
 /* Dark mode variables */
 [data-theme="dark"] {
@@ -66,29 +89,15 @@
                         0 0 30px rgba(0, 119, 217, 0.2);
 }
 
-/* ----- Base styles ----- */
+/*=================================
+  2. Base & Global Styles
+=================================*/
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
     font-family: 'Comfortaa', 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
-}
-
-/* Skip to content - accessibility */
-.skip-to-content {
-    position: absolute;
-    top: -40px;
-    left: -9999px; /* Move offscreen instead of just hiding */
-    background: var(--primary);
-    color: white;
-    padding: 8px;
-    z-index: 9999;
-    transition: top 0.3s;
-}
-
-.skip-to-content:focus {
-    left: 0;
-    top: 0;
 }
 
 body {
@@ -130,60 +139,27 @@ body::after {
         linear-gradient(0deg, rgba(0,0,0,0) 0%, rgba(0,119,217,0.05) 50%, rgba(0,0,0,0) 100%);
 }
 
-@keyframes diagonalLineMove {
-    0% { background-position: 0 0; }
-    100% { background-position: 200px 200px; }
+/* Accessibility - Skip to content */
+.skip-to-content {
+    position: absolute;
+    top: -40px;
+    left: -9999px; /* Move offscreen instead of just hiding */
+    background: var(--primary);
+    color: white;
+    padding: 8px;
+    z-index: 9999;
+    transition: top 0.3s;
 }
 
-/* ----- Loading State ----- */
-.loading-state {
-    grid-column: 1 / -1;
-    text-align: center;
-    padding: 50px 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 15px;
+.skip-to-content:focus {
+    left: 0;
+    top: 0;
 }
 
-.loading-spinner {
-    display: inline-block;
-    width: 40px;
-    height: 40px;
-    border: 4px solid rgba(0, 119, 217, 0.3);
-    border-radius: 50%;
-    border-top-color: var(--primary);
-    animation: spin 1s ease-in-out infinite;
-}
+/*=================================
+  3. Header & Title
+=================================*/
 
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-/* ----- Animations ----- */
-@keyframes fadeIn {
-    from { 
-        opacity: 0;
-        transform: translateY(20px) scale(0.95);
-    }
-    to { 
-        opacity: 1;
-        transform: translateY(-5px) scale(1);
-    }
-}
-
-@keyframes pulse {
-    0% { transform: translate(5%, 5%) scale(1); }
-    100% { transform: translate(-5%, -5%) scale(1.1); }
-}
-
-@keyframes modalFadeIn {
-    from {opacity: 0; transform: translateY(-30px) scale(0.95);}
-    to {opacity: 1; transform: translateY(0) scale(1);}
-}
-
-/* ----- Header ----- */
 header {
     text-align: center;
     margin-bottom: 35px;
@@ -236,7 +212,7 @@ h1 {
     opacity: 0.95;
 }
 
-/* ----- Theme toggle ----- */
+/* Theme toggle */
 .theme-toggle {
     margin-right: 20px;
     margin-top: 10px;
@@ -314,7 +290,11 @@ h1 {
     }
 }
 
-/* ----- Search ----- */
+/*=================================
+  4. Search & Filter Components
+=================================*/
+
+/* Search bar */
 .search-container {
     position: relative;
     display: flex;
@@ -329,7 +309,7 @@ h1 {
 
 #search {
     padding: 14px 22px;
-    padding-right: 50px; /* Adjusted to make space for the clear button */
+    padding-right: 50px; /* Space for the clear button */
     width: 100%;
     max-width: 500px;
     border: none;
@@ -390,7 +370,7 @@ h1 {
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     margin: 0;
-    z-index: 10; /* Ensure the button is above other elements */
+    z-index: 10; /* Ensure button above other elements */
 }
 
 .search-clear-btn:hover {
@@ -413,7 +393,7 @@ h1 {
     background: rgba(255, 255, 255, 0.15);
 }
 
-/* ----- Filter system ----- */
+/* Filter system */
 .filter-container {
     display: flex;
     justify-content: center;
@@ -536,11 +516,11 @@ h1 {
     border-color: var(--primary-light);
 }
 
-/* ----- Sort controls ----- */
+/* Sort controls */
 .sort-container {
     display: flex;
     align-items: center;
-    justify-content: space-between; /* Changed to space-between */
+    justify-content: space-between;
     margin-bottom: 20px;
     max-width: 1400px;
     margin-left: auto;
@@ -548,7 +528,8 @@ h1 {
     padding: 0 15px;
 }
 
-.sort-controls, .desktop-compact-toggle {
+.sort-controls, 
+.desktop-compact-toggle {
     display: flex;
     align-items: center;
     gap: 12px;
@@ -564,33 +545,6 @@ h1 {
 .desktop-compact-toggle {
     min-width: 140px;
     justify-content: space-between;
-}
-
-/* Update mobile sort options */
-.mobile-sort-toggle {
-    display: flex;
-    width: 100%;
-    gap: 8px;
-}
-
-.mobile-sort-option {
-    flex: 1;
-    padding: 10px 12px;
-    background-color: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(0, 119, 217, 0.2);
-    border-radius: 30px;
-    font-size: 0.85rem;
-    color: var(--text);
-    cursor: pointer;
-    transition: var(--transition-normal);
-    min-height: 44px;
-    width: 100%;
-}
-
-[data-theme="dark"] .mobile-sort-option {
-    background-color: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.15);
-    color: rgba(255, 255, 255, 0.8); /* Brighter text in dark mode */
 }
 
 /* Desktop toggle switch */
@@ -707,7 +661,410 @@ h1 {
     color: var(--white);
 }
 
-/* ----- Recipe cards ----- */
+/* Mobile sort toggle */
+.mobile-sort-interface {
+    display: none;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    padding: 10px 15px;
+    gap: 12px;
+    background-color: var(--card-glass);
+    border-radius: var(--border-radius-card);
+    box-shadow: var(--shadow-sm);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+}
+
+.mobile-sort-label {
+    font-size: 0.85rem;
+    color: var(--primary);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.mobile-sort-toggle {
+    display: flex;
+    width: 100%;
+    gap: 8px;
+}
+
+.mobile-sort-option {
+    flex: 1;
+    padding: 10px 12px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(0, 119, 217, 0.2);
+    border-radius: 30px;
+    font-size: 0.85rem;
+    color: var(--text);
+    cursor: pointer;
+    transition: var(--transition-normal);
+    min-height: 44px;
+    width: 100%;
+}
+
+.mobile-sort-option.active {
+    background-color: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+[data-theme="dark"] .mobile-sort-interface {
+    background-color: var(--card-glass-dark);
+    border-color: var(--glass-border-dark);
+}
+
+[data-theme="dark"] .mobile-sort-option {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.15);
+    color: var(--text);
+}
+
+[data-theme="dark"] .mobile-sort-option:not(.active):hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="dark"] .mobile-sort-option.active {
+    background-color: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+/* Mobile filter panel */
+.mobile-filter-panel {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translate(-50%, 100%);
+    width: calc(100% - 40px);
+    max-width: 1400px; /* Match cards-container max-width */
+    margin: 0 auto;
+    background-color: var(--card-glass);
+    border-top-left-radius: 30px;
+    border-top-right-radius: 30px;
+    box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.2);
+    z-index: 999;
+    transition: transform 0.3s ease;
+    padding: 20px 15px; /* Reduced from 30px 20px */
+    max-height: 85vh;
+    overflow-y: auto;
+    backdrop-filter: blur(20px);
+    -webkit-overflow-scrolling: touch;
+}
+
+.mobile-filter-panel.show {
+    transform: translate(-50%, 0);
+}
+
+[data-theme="dark"] .mobile-filter-panel {
+    background-color: rgba(34, 34, 48, 0.40);
+    border: 1px solid var(--glass-border-dark);
+    box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.4);
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px; /* Reduced from 20px */
+    padding-bottom: 8px; /* Reduced from 10px */
+    border-bottom: 1px solid rgba(0, 119, 217, 0.2);
+}
+
+.panel-header h3 {
+    font-size: 1.5rem;
+    color: var(--primary);
+}
+
+.panel-close-btn {
+    background: none;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    font-size: 24px;
+    color: var(--text-dark); /* Dark text color for contrast */
+    cursor: pointer;
+    transition: transform 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%; /* Make it circular */
+}
+
+.panel-close-btn:active {
+    transform: scale(0.95);
+}
+
+[data-theme="dark"] .panel-close-btn {
+    background: rgba(94, 94, 94, 0.3); /* Dark background for readability */
+    color: var(--white); /* Light text for contrast */
+}
+
+[data-theme="dark"] .mobile-filter-panel .panel-header {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .mobile-filter-panel .panel-header h3 {
+    color: var(--white);
+    font-weight: 600;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Mobile filter options */
+.mobile-filter-options {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    margin-bottom: 8px;
+}
+
+.mobile-filter-btn-item {
+    position: relative;
+    padding: 8px;
+    min-height: 40px;
+    width: 100%;
+    border: 1px solid rgba(0, 119, 217, 0.2);
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.mobile-filter-btn-item:first-child {
+    grid-column: 1 / -1;
+    min-height: 44px;
+    margin-bottom: 4px;
+}
+
+.mobile-filter-item-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.mobile-filter-btn-item:first-child .mobile-filter-item-content {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 8px;
+}
+
+.filter-emoji {
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+.filter-text {
+    font-size: 0.85rem;
+    text-align: center;
+    width: 100%;
+    line-height: 1.2;
+}
+
+.mobile-count {
+    background-color: rgba(0, 0, 0, 0.1);
+    padding: 2px 6px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    line-height: 1.4;
+}
+
+.mobile-filter-btn-item.active {
+    background-color: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    box-shadow: 0 2px 8px rgba(0, 119, 217, 0.3);
+    transform: translateY(-2px);
+}
+
+.mobile-filter-btn-item.active .mobile-filter-item-content {
+    color: white;
+}
+
+.mobile-filter-btn-item.active .mobile-count {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+[data-theme="dark"] .mobile-filter-btn-item {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--white);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="dark"] .mobile-filter-btn-item .filter-text {
+    color: var(--white);
+    opacity: 0.9;
+}
+
+[data-theme="dark"] .mobile-filter-btn-item .mobile-count {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: var(--white);
+}
+
+[data-theme="dark"] .mobile-filter-btn-item:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+[data-theme="dark"] .mobile-filter-btn-item.active {
+    background-color: var(--primary);
+    color: white;
+    border-color: var(--primary-light);
+    box-shadow: 0 2px 8px rgba(0, 119, 217, 0.4),
+                0 0 20px rgba(0, 119, 217, 0.2);
+}
+
+/* View options for mobile panel */
+.view-options {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(0, 119, 217, 0.2);
+}
+
+.view-options h4 {
+    color: var(--text);
+    margin-bottom: 8px;
+    font-size: 1rem;
+}
+
+.toggle-group {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.toggle-switch {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    flex: 1 1 0;
+    min-width: 130px;
+    padding: 6px 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(0, 119, 217, 0.3);
+    border-radius: 12px;
+    transition: var(--transition-normal);
+}
+
+.toggle-switch:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(0, 119, 217, 0.3);
+}
+
+.toggle-slider {
+    position: relative;
+    display: inline-block;
+    width: 32px;
+    height: 18px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 20px;
+    margin-right: 10px;
+    transition: 0.3s ease;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    border-radius: 50%;
+    transition: 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-switch input:checked + .toggle-slider {
+    background-color: var(--primary);
+}
+
+.toggle-switch input:checked + .toggle-slider:before {
+    transform: translateX(14px);
+}
+
+.toggle-label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text);
+    white-space: nowrap; /* Prevent text wrapping */
+    width: 85px; /* Fixed width for label */
+}
+
+[data-theme="dark"] .view-options {
+    border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .view-options h4 {
+    color: var(--white);
+}
+
+[data-theme="dark"] .toggle-switch {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+[data-theme="dark"] .toggle-switch:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+[data-theme="dark"] .toggle-label {
+    color: var(--white);
+}
+
+[data-theme="dark"] .toggle-slider {
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+/* Hide checkbox but maintain functionality */
+.toggle-switch input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* Mobile filter button */
+.mobile-filter-btn {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(44, 153, 255, 0.550);
+    color: var(--text);
+    border: none;
+    box-shadow: 
+        0 4px 15px rgba(0, 0, 0, 0.394),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 990;
+    backdrop-filter: blur(3px);
+    transition: transform 0.3s ease;
+}
+
+.filter-icon {
+    font-size: 1.4rem;
+}
+
+.mobile-filter-btn:active {
+    transform: scale(0.95);
+    background-color: var(--primary-dark);
+}
+
+/*=================================
+  5. Recipe Cards
+=================================*/
+
 .cards-container {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -771,19 +1128,7 @@ h1 {
     }
 }
 
-/* Remove hover styles for touch devices */
-@media (hover: none) {
-    .recipe-card:hover {
-        transform: none;
-        box-shadow: var(--shadow-md);
-    }
-
-    [data-theme="dark"] .recipe-card:hover {
-        transform: none;
-        box-shadow: var(--shadow-md);
-    }
-}
-
+/* Stagger card animations */
 .recipe-card:nth-child(1) { animation-delay: 0.1s; }
 .recipe-card:nth-child(2) { animation-delay: 0.15s; }
 .recipe-card:nth-child(3) { animation-delay: 0.2s; }
@@ -838,13 +1183,13 @@ h1 {
     padding-bottom: 10px;
 }
 
-/* Regular category tag */
+/* Category tag */
 .category-tag {
     background-color: var(--secondary);
     color: var(--primary-dark);
-    padding: 4px 10px;    /* Reduce padding */
+    padding: 4px 10px;
     border-radius: 20px;
-    font-size: 0.7rem;    /* Make font smaller */
+    font-size: 0.7rem;
     margin-top: 10px;
     font-weight: 600;
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
@@ -855,8 +1200,7 @@ h1 {
     text-transform: uppercase;
     letter-spacing: 0.03em;
     text-align: center;
-    width: auto;          /* Remove 100% width */
-    min-width: 80px;      /* Add min-width for consistency */
+    min-width: 80px;
 }
 
 [data-theme="dark"] .category-tag {
@@ -944,7 +1288,74 @@ h1 {
     background: linear-gradient(to bottom, rgba(255,255,255,0.08) 0%, transparent 100%);
 }
 
-/* ----- Modal ----- */
+/* Compact View Layout */
+.compact-view .recipe-card {
+    display: grid;
+    grid-template-columns: 40% 60%; /* 40/60 split */
+    gap: 0;
+    min-height: 160px;
+    max-height: none; /* Remove height restriction */
+}
+
+.compact-view .card-header {
+    padding: 16px;
+    width: 100%;
+    max-width: none; /* Remove width restriction */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 8px;
+}
+
+.compact-view .recipe-title {
+    font-size: 1rem;
+    line-height: 1.3;
+    margin-bottom: 4px;
+    hyphens: auto;
+    word-break: break-word;
+    -webkit-hyphens: auto;
+    -ms-hyphens: auto;
+}
+
+.compact-view .author {
+    font-size: 0.85rem;
+    margin-bottom: 4px;
+}
+
+.compact-view .category-tag {
+    font-size: 0.75rem;
+    padding: 3px 8px;
+    margin-top: auto; /* Push tag to bottom of header */
+    width: 100%;
+}
+
+.compact-view .card-preview {
+    padding: 16px;
+    gap: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.compact-view .preview-text {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    -webkit-line-clamp: unset; /* Remove line clamp */
+    max-height: none; /* Remove height restriction */
+    flex-grow: 1; /* Allow text to fill available space */
+}
+
+.compact-view .view-btn {
+    font-size: 0.85rem;
+    padding: 6px 14px;
+    margin-top: 12px;
+}
+
+/*=================================
+  6. Recipe Modal/Dialog
+=================================*/
+
 .modal {
     display: none;
     position: fixed;
@@ -989,11 +1400,6 @@ h1 {
     opacity: 0;
 }
 
-.modal.hide .modal-content {
-    transform: scale(0.9);
-    opacity: 0;
-}
-
 [data-theme="dark"] .modal-content {
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4),
                 0 0 0 2px rgba(0, 119, 217, 0.3),
@@ -1002,20 +1408,20 @@ h1 {
 
 .close {
     position: absolute;
-    top: 10px; /* Adjusted from 0 */
-    right: 10px; /* Adjusted from 0 */
+    top: 10px;
+    right: 10px;
     font-size: 28px;
     line-height: 28px;
     font-weight: bold;
     color: white;
     cursor: pointer;
-    width: 40px; /* Adjusted size */
-    height: 40px; /* Adjusted size */
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
     background-color: rgba(0, 0, 0, 0.1);
-    border-radius: 50%; /* Changed to circle */
+    border-radius: 50%;
     z-index: 10;
     transition: background-color 0.3s ease, transform 0.3s ease;
     border: none;
@@ -1100,7 +1506,7 @@ h1 {
     min-height: 40px;
 }
 
-/* Add classes for modal scroll effects */
+/* Modal scroll effects */
 .modal-body.can-scroll-up::before,
 .modal-body.can-scroll-down::after {
     display: none;
@@ -1168,31 +1574,12 @@ h1 {
     }
 }
 
-/* Recipe actions */
-.recipe-actions {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-    padding: 20px;
-    display: flex;
-    justify-content: center;
-    border-radius: 0 0 21px 21px;
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 20;
-}
-
-[data-theme="dark"] .recipe-actions {
-    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
-}
-
-/* ----- Recipe content styling ----- */
+/* Recipe content in modal */
 .ingredients-title-container {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin: 0px 0 15px;
-    padding-top: 20px;
+    margin: 15px 0 15px;
     padding-bottom: 20px;
     border-bottom: 1px solid rgba(0, 119, 217, 0.15);
 }
@@ -1229,7 +1616,7 @@ h1 {
 
 .copy-ingredients-btn {
     position: relative;
-    background-color: var (--secondary);
+    background-color: var(--secondary);
     border: none;
     border-radius: var(--border-radius-button);
     padding: 8px 16px;
@@ -1367,7 +1754,7 @@ h1 {
 .print-btn {
     padding: 12px 24px;
     background: rgba(255, 255, 255, 0.85);
-    color: var (--primary-dark);
+    color: var(--primary-dark);
     border: none;
     border-radius: var(--border-radius-button);
     cursor: pointer;
@@ -1427,71 +1814,32 @@ h1 {
     border-color: grey;
 }
 
-/* ----- Mobile sort toggle ----- */
-.mobile-sort-interface {
-    display: none;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 20px;
-    padding: 10px 15px;
-    gap: 12px;
-    background-color: var(--card-glass);
-    border-radius: var(--border-radius-card);
-    box-shadow: var(--shadow-sm);
-    backdrop-filter: blur(10px);
-    border: 1px solid var(--glass-border);
-}
+/*=================================
+  7. Interface Elements & Indicators
+=================================*/
 
-.mobile-sort-label {
-    font-size: 0.85rem;
-    color: var(--primary);
-    font-weight: 600;
-    white-space: nowrap;
-}
-
-.mobile-sort-option {
-    flex: 1;
-    padding: 8px 12px;
-    background-color: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(0, 119, 217, 0.2);
-    border-radius: 30px;
-    font-size: 0.85rem;
-    color: var (--text);
-    cursor: pointer;
-    transition: var(--transition-normal), background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
-    min-height: 44px;
-}
-
-.mobile-sort-option.active {
-    background-color: var(--primary);
+/* Copy tooltip */
+.copy-tooltip {
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.7);
     color: white;
-    border-color: var(--primary);
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 0.8rem;
+    right: 50px;
+    top: 10px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    pointer-events: none;
 }
 
-[data-theme="dark"] .mobile-sort-interface {
-    background-color: var(--card-glass-dark);
-    border-color: var(--glass-border-dark);
+.copy-tooltip.show {
+    opacity: 1;
+    visibility: visible;
 }
 
-[data-theme="dark"] .mobile-sort-option {
-    background-color: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.1);
-    color: var (--text);
-}
-
-[data-theme="dark"] .mobile-sort-option:not(.active):hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.2);
-}
-
-[data-theme="dark"] .mobile-sort-option.active {
-    background-color: var(--primary);
-    color: white;
-    border-color: var (--primary);
-}
-
-/* ----- Touch indicators ----- */
+/* Touch indicators */
 .touch-indicator {
     position: absolute;
     top: 50%;
@@ -1528,357 +1876,109 @@ h1 {
     transform: translateY(-50%) scale(1.1);
 }
 
-/* ----- Mobile filter panel ----- */
-.mobile-filter-panel {
-    position: fixed;
-    bottom: 0;
-    left: 50%;
-    transform: translate(-50%, 100%);
-    width: calc(100% - 40px);
-    max-width: 1400px; /* Match cards-container max-width */
-    margin: 0 auto;
-    background-color: var(--card-glass);
-    border-top-left-radius: 30px;
-    border-top-right-radius: 30px;
-    box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.2);
-    z-index: 999;
-    transition: transform 0.3s ease;
-    padding: 20px 15px; /* Reduced from 30px 20px */
-    max-height: 85vh;
-    overflow-y: auto;
-    backdrop-filter: blur(20px);
-    -webkit-overflow-scrolling: touch;
-}
-
-.mobile-filter-panel.show {
-    transform: translate(-50%, 0);
-}
-
-[data-theme="dark"] .mobile-filter-panel {
-    background-color: rgba(34, 34, 48, 0.40);
-    border: 1px solid var(--glass-border-dark);
-    box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.4);
-}
-
-.panel-header {
+/* Swipe Indicators */
+.swipe-indicator {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: rgba(0, 119, 217, 0.8);
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 15px; /* Reduced from 20px */
-    padding-bottom: 8px; /* Reduced from 10px */
-    border-bottom: 1px solid rgba(0, 119, 217, 0.2);
-}
-
-.panel-header h3 {
-    font-size: 1.5rem;
-    color: var(--primary);
-}
-
-.panel-close-btn {
-    background: none;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    font-size: 24px;
-    color: var(--text-dark); /* Dark text color for contrast */
-    cursor: pointer;
-    transition: transform 0.3s ease, background-color 0.3s ease, color 0.3s ease;
-    width: 44px;
-    height: 44px;
-    display: flex;
     justify-content: center;
-    align-items: center;
-    border-radius: 50%; /* Make it circular */
-}
-
-.panel-close-btn:active {
-    transform: scale(0.95);
-}
-
-[data-theme="dark"] .panel-close-btn {
-    background: rgba(94, 94, 94, 0.3); /* Dark background for better readability */
-    color: var(--white); /* Light text color for contrast */
-}
-
-[data-theme="dark"] .mobile-filter-panel .panel-header {
-    border-bottom-color: rgba(255, 255, 255, 0.1);
-}
-
-[data-theme="dark"] .mobile-filter-panel .panel-header h3 {
-    color: var(--white);
-    font-weight: 600;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-}
-
-/* Mobile filter options */
-.mobile-filter-options {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 4px;
-    margin-bottom: 8px;
-}
-
-.mobile-filter-btn-item {
-    position: relative;
-    padding: 8px;
-    min-height: 40px;
-    width: 100%;
-    border: 1px solid rgba(0, 119, 217, 0.2);
-    background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
+    color: white;
+    font-size: 20px;
+    opacity: 0.7;
+    z-index: 100;
     transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    pointer-events: none; /* Don't block touch events */
 }
 
-.mobile-filter-btn-item:first-child {
+.swipe-indicator-left {
+    left: 12px;
+    animation: fadeInLeft 0.5s forwards;
+}
+
+.swipe-indicator-right {
+    right: 12px;
+    animation: fadeInRight 0.5s forwards;
+}
+
+.swipe-indicator.pulse {
+    animation: pulsate 1s ease-out;
+}
+
+/* Swipe hint overlay */
+.swipe-hint {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 150;
+    white-space: nowrap;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+}
+
+.swipe-hint.show {
+    opacity: 0.9;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* Dark mode adjustments */
+[data-theme="dark"] .swipe-indicator {
+    background-color: rgba(0, 119, 217, 0.8);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .swipe-hint {
+    background-color: rgba(0, 0, 0, 0.8);
+    box-shadow: 0 0 15px rgba(0, 119, 217, 0.6), 0 0 0 1px rgba(0, 119, 217, 0.4);
+    border: 1px solid rgba(0, 119, 217, 0.6);
+}
+
+[data-theme="dark"] .swipe-hint.show {
+    opacity: 0.95; /* Slightly more visible in dark mode */
+}
+
+/* Hide indicators when not needed */
+.modal-content:not(.can-swipe) .swipe-indicator,
+.modal-content:not(.can-swipe) .swipe-hint {
+    display: none;
+}
+
+/* Loading states */
+.loading-state {
     grid-column: 1 / -1;
-    min-height: 44px;
-    margin-bottom: 4px;
-}
-
-.mobile-filter-item-content {
+    text-align: center;
+    padding: 50px 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
-}
-
-.mobile-filter-btn-item:first-child .mobile-filter-item-content {
-    flex-direction: row;
-    justify-content: flex-start;
-    gap: 8px;
-}
-
-.filter-emoji {
-    font-size: 1.1rem;
-    line-height: 1;
-}
-
-.filter-text {
-    font-size: 0.85rem;
-    text-align: center;
-    width: 100%;
-    line-height: 1.2;
-}
-
-.mobile-count {
-    background-color: rgba(0, 0, 0, 0.1);
-    padding: 2px 6px;
-    border-radius: 12px;
-    font-size: 0.75rem;
-    font-weight: bold;
-    line-height: 1.4;
-}
-
-.mobile-filter-btn-item.active {
-    background-color: var(--primary);
-    color: white;
-    border-color: var(--primary);
-    box-shadow: 0 2px 8px rgba(0, 119, 217, 0.3);
-    transform: translateY(-2px);
-}
-
-.mobile-filter-btn-item.active .mobile-filter-item-content {
-    color: white;
-}
-
-.mobile-filter-btn-item.active .mobile-count {
-    background-color: rgba(255, 255, 255, 0.2);
-    color: white;
-}
-
-[data-theme="dark"] .mobile-filter-btn-item {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: var(--white);
-    border-color: rgba(255, 255, 255, 0.2);
-}
-
-[data-theme="dark"] .mobile-filter-btn-item .filter-text {
-    color: var(--white);
-    opacity: 0.9;
-}
-
-[data-theme="dark"] .mobile-filter-btn-item .mobile-count {
-    background-color: rgba(255, 255, 255, 0.15);
-    color: var(--white);
-}
-
-[data-theme="dark"] .mobile-filter-btn-item:hover {
-    background-color: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.3);
-    transform: translateY(-1px);
-}
-
-[data-theme="dark"] .mobile-filter-btn-item.active {
-    background-color: var(--primary);
-    color: white;
-    border-color: var(--primary-light);
-    box-shadow: 0 2px 8px rgba(0, 119, 217, 0.4),
-                0 0 20px rgba(0, 119, 217, 0.2);
-}
-
-/* View options */
-.view-options {
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px solid rgba(0, 119, 217, 0.2);
-}
-
-.view-options h4 {
-    color: var(--text);
-    margin-bottom: 8px;
-    font-size: 1rem;
-}
-
-.toggle-group {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-
-.toggle-switch {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    flex: 1 1 0;
-    min-width: 130px;
-    padding: 6px 8px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(0, 119, 217, 0.3);
-    border-radius: 12px;
-    transition: var(--transition-normal);
-}
-
-.toggle-switch:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(0, 119, 217, 0.3); /* Keep original border color */
-}
-
-.toggle-slider {
-    position: relative;
-    display: inline-block;
-    width: 32px;
-    height: 18px;
-    background-color: rgba(0, 0, 0, 0.2);
-    border-radius: 20px;
-    margin-right: 10px;
-    transition: 0.3s ease;
-}
-
-.toggle-slider:before {
-    position: absolute;
-    content: "";
-    height: 14px;
-    width: 14px;
-    left: 2px;
-    bottom: 2px;
-    background-color: white;
-    border-radius: 50%;
-    transition: 0.3s ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.toggle-switch input:checked + .toggle-slider {
-    background-color: var(--primary);
-}
-
-.toggle-switch input:checked + .toggle-slider:before {
-    transform: translateX(14px);
-}
-
-.toggle-label {
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: var(--text);
-    white-space: nowrap; /* Prevent text wrapping */
-    width: 85px; /* Fixed width for label */
-}
-
-[data-theme="dark"] .view-options {
-    border-top-color: rgba(255, 255, 255, 0.1);
-}
-
-[data-theme="dark"] .view-options h4 {
-    color: var(--white);
-}
-
-[data-theme="dark"] .toggle-switch {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-}
-
-[data-theme="dark"] .toggle-switch:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.15); /* Keep original border color */
-}
-
-[data-theme="dark"] .toggle-label {
-    color: var(--white);
-}
-
-[data-theme="dark"] .toggle-slider {
-    background-color: rgba(0, 0, 0, 0.4);
-}
-
-/* Hide checkbox but maintain functionality */
-.toggle-switch input[type="checkbox"] {
-    position: absolute;
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-/* ----- Filter icon ----- */
-.mobile-filter-btn {
-    display: none;
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: rgba(44, 153, 255, 0.550);
-    color: var(--text);
-    border: none;
-    box-shadow: 
-        0 4px 15px rgba(0, 0, 0, 0.394),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.4);
-    align-items: center;
     justify-content: center;
-    cursor: pointer;
-    z-index: 990;
-    backdrop-filter: blur(3px);
-    transition: transform 0.3s ease;
+    gap: 15px;
 }
 
-.filter-icon {
-    font-size: 1.4rem;
+.loading-spinner {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(0, 119, 217, 0.3);
+    border-radius: 50%;
+    border-top-color: var(--primary);
+    animation: spin 1s ease-in-out infinite;
 }
 
-.mobile-filter-btn:active {
-    transform: scale(0.95);
-    background-color: var(--primary-dark);
-}
-
-/* ----- Copy tooltip ----- */
-.copy-tooltip {
-    position: absolute;
-    background-color: rgba(0, 0, 0, 0.7);
-    color: white;
-    padding: 5px 10px;
-    border-radius: 5px;
-    font-size: 0.8rem;
-    right: 50px;
-    top: 10px;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
-    pointer-events: none;
-}
-
-.copy-tooltip.show {
-    opacity: 1;
-    visibility: visible;
-}
-
-/* ----- No results message ----- */
+/* No results message */
 .no-results {
     text-align: center;
     grid-column: 1 / -1;
@@ -1925,93 +2025,115 @@ h1 {
     }
 }
 
-/* ----- Compact View Layout ----- */
-.compact-view .recipe-card {
-    display: grid;
-    grid-template-columns: 40% 60%; /* Changed to exact 40/60 split */
-    gap: 0;
-    min-height: 160px;
-    max-height: none; /* Remove height restriction */
-}
-
-.compact-view .card-header {
-    padding: 16px;
-    width: 100%;
-    max-width: none; /* Remove width restriction */
+/* Mobile action buttons */
+.mobile-print-btn {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 0;
+    justify-content: center;
+    background: var(--secondary);
+    transition: var(--transition-bounce);
+    border: none;
     display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    gap: 8px;
+    align-items: center;
+    justify-content: center;
 }
 
-.compact-view .recipe-title {
-    font-size: 1rem;
-    line-height: 1.3;
-    margin-bottom: 4px;
-    hyphens: auto;
-    word-break: break-word;
-    -webkit-hyphens: auto;
-    -ms-hyphens: auto;
-}
-
-.compact-view .author {
-    font-size: 0.85rem;
-    margin-bottom: 4px;
-}
-
-.compact-view .category-tag {
-    font-size: 0.75rem;
-    padding: 3px 8px;
-    margin-top: auto; /* Push tag to bottom of header */
-    width: 100%;
-}
-
-.compact-view .card-preview {
-    padding: 16px;
-    gap: 12px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
-.compact-view .preview-text {
+.mobile-print-btn::before {
+    content: '🖨️';
+    font-size: 1.2rem;
     margin: 0;
-    font-size: 0.9rem;
-    line-height: 1.5;
-    -webkit-line-clamp: unset; /* Remove line clamp */
-    max-height: none; /* Remove height restriction */
-    flex-grow: 1; /* Allow text to fill available space */
 }
 
-.compact-view .view-btn {
-    font-size: 0.85rem;
-    padding: 6px 14px;
-    margin-top: 12px;
+.modal-action-buttons {
+    display: flex;
+    gap: 8px;
+    align-items: center;
 }
 
-/* ----- Reduced Motion ----- */
-@media (prefers-reduced-motion: reduce) {
-    * {
-        animation-duration: 0.001ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.001ms !important;
-        scroll-behavior: auto !important;
+[data-theme="dark"] .mobile-print-btn {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--white);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+[data-theme="dark"] .mobile-print-btn:active {
+    background-color: var(--primary);
+}
+
+/* Remove vanilla print button */
+button[onclick*="print"] {
+    display: none !important;
+}
+
+/*=================================
+  8. Animations & Transitions
+=================================*/
+
+@keyframes diagonalLineMove {
+    0% { background-position: 0 0; }
+    100% { background-position: 200px 200px; }
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+    from { 
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
     }
-    
-    body::after {
-        animation: none !important;
-    }
-    
-    .recipe-card {
-        transition: none !important;
-    }
-    
-    header::before {
-        animation: none !important;
+    to { 
+        opacity: 1;
+        transform: translateY(-5px) scale(1);
     }
 }
 
-/* ----- Media Queries for Responsive Design ----- */
+@keyframes pulse {
+    0% { transform: translate(5%, 5%) scale(1); }
+    100% { transform: translate(-5%, -5%) scale(1.1); }
+}
+
+@keyframes modalFadeIn {
+    from {opacity: 0; transform: translateY(-30px) scale(0.95);}
+    to {opacity: 1; transform: translateY(0) scale(1);}
+}
+
+@keyframes cardEnter {
+    0% {
+        opacity: 0;
+        transform: scale(0.95) translateY(10px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes fadeInLeft {
+    from { opacity: 0; transform: translate(-10px, -50%); }
+    to { opacity: 0.7; transform: translateY(-50%); }
+}
+
+@keyframes fadeInRight {
+    from { opacity: 0; transform: translate(10px, -50%); }
+    to { opacity: 0.7; transform: translateY(-50%); }
+}
+
+@keyframes pulsate {
+    0% { transform: translateY(-50%) scale(1); opacity: 0.7; }
+    50% { transform: translateY(-50%) scale(1.2); opacity: 1; }
+    100% { transform: translateY(-50%) scale(1); opacity: 0.7; }
+}
+
+/*=================================
+  9. Media Queries & Responsive Design
+=================================*/
+
+/* Desktop (768px and above) */
 @media (min-width: 769px) {
     .sort-container {
         display: flex;
@@ -2028,11 +2150,102 @@ h1 {
     .mobile-print-btn {
         display: none;
     }
+
+    /* Desktop modal styles */
+    .modal-content {
+        max-width: 800px;
+        width: 90%;
+        background: var(--card);
+        border-radius: var(--border-radius-card);
+    }
+
+    .instructions-list li {
+        position: relative;
+        margin-bottom: 12px;
+        padding: 16px 16px 16px 56px;
+        background-color: rgba(0, 119, 217, 0.05);
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .instructions-list li::before {
+        content: counter(inst-counter);
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 32px;
+        height: 32px;
+        background: var(--primary);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    .instructions-list li:hover {
+        background-color: rgba(0, 119, 217, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .instructions-list li:hover::before {
+        transform: translateY(-50%) scale(1.1);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Desktop modal footer buttons */
+    .modal-footer {
+        display: flex;
+        justify-content: space-between;
+        padding: 20px;
+    }
+
+    .modal-footer .print-btn {
+        position: relative;
+        width: auto;
+        padding: 12px 25px;
+        background: var(--secondary);
+        color: var(--primary-dark);
+        border-radius: var(--border-radius-button);
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: var(--transition-bounce);
+        max-width: none;
+        margin: 0;
+    }
+
+    .modal-footer .next-btn {
+        padding: 12px 25px;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: var(--border-radius-button);
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: var(--transition-bounce);
+    }
+
+    @media (hover: hover) {
+        .modal-footer .print-btn:hover,
+        .modal-footer .next-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
+    }
 }
 
+/* Mobile (768px and below) */
 @media (max-width: 768px) {
     /* Base adjustments */
-
     body {
         padding-bottom: 100px;
     }
@@ -2127,6 +2340,10 @@ h1 {
     }
     
     /* Modal adjustments */
+    .modal {
+        padding: 15px !important;
+    }
+    
     .modal-content {
         width: 100%;
         height: calc(100% - 40px); /* Add 20px spacing top and bottom */
@@ -2171,8 +2388,6 @@ h1 {
     }
     
     .instructions-list li {
-        margin-left: -10px;
-        margin-right: -10px;
         padding: 12px 0px 12px 44px;
         background-color: rgba(0, 119, 217, 0.05);
         border-radius: 12px;
@@ -2237,7 +2452,7 @@ h1 {
         border-radius: 50%;
         font-size: 0;
         justify-content: center;
-        background: var (--secondary);
+        background: var(--secondary);
         transition: var(--transition-bounce);
         border: none;
         display: flex;
@@ -2255,17 +2470,6 @@ h1 {
         display: flex;
         gap: 8px;
         align-items: center;
-    }
-    
-    /* Dark mode adjustments */
-    [data-theme="dark"] .mobile-print-btn {
-        background-color: rgba(255, 255, 255, 0.1);
-        color: var(--white);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-    }
-    
-    [data-theme="dark"] .mobile-print-btn:active {
-        background-color: var(--primary);
     }
     
     /* Buttons adjustments */
@@ -2354,98 +2558,39 @@ h1 {
         border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    /* Dark mode compact view adjustments */
-    [data-theme="dark"] .compact-view .recipe-card {
-        background-color: rgba(34, 34, 48, 0.9);
+    /* Modal footer adjustments */
+    .modal-footer {
+        display: none !important; /* Hide the modal footer on mobile */
     }
 
-    [data-theme="dark"] .compact-view .card-preview {
-        border-left: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    /* Compact view mobile adjustments */
-    .compact-view .recipe-card {
-        grid-template-columns: 40% 60%; /* Match desktop ratio */
-        min-height: 160px;
-        max-height: none; /* Remove height restriction */
-    }
-    
-    .compact-view .card-header {
-        padding: 16px;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-        gap: 8px;
-        min-height: 0; /* Remove min-height */
-    }
-    
-    .compact-view .card-preview {
-        padding: 16px;
-        gap: 12px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        padding-bottom: 16px; /* Remove extra bottom padding */
-    }
-    
-    .compact-view .preview-text {
-        margin: 0;
+    .print-btn {
+        position: fixed;
+        bottom: 15px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: auto;
+        max-width: none;
         font-size: 0.9rem;
-        line-height: 1.5;
-        -webkit-line-clamp: unset; /* Remove line clamp */
-        max-height: none;
-        flex-grow: 1;
+        padding: 10px 20px;
+        border-radius: 25px;
+        background: var(--primary);
+        color: white;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        z-index: 100;
     }
 
+    .print-btn::before {
+        font-size: 1rem;
+    }
+
+    .modal-body li {
+        font-size: 0.85rem;
+    }
+    
     /* Form inputs adjustments */
     input, select, textarea {
         font-size: 16px;
         -webkit-tap-highlight-color: transparent;
-    }
-
-    .mobile-filter-btn-item {
-        position: relative;
-        padding: 12px;
-        min-height: 44px;
-        width: 100%;
-        border: 2px solid rgba(0, 119, 217, 0.2);
-        background-color: rgba(255, 255, 255, 0.1);
-        border-radius: 12px;
-    }
-
-    .mobile-filter-item-content {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 8px;
-        width: 100%;
-    }
-
-    .mobile-filter-btn-item:first-child .mobile-filter-item-content {
-        flex-direction: row;
-        justify-content: flex-start;
-        gap: 12px;
-    }
-
-    .filter-emoji {
-        font-size: 1.2rem;
-        line-height: 1;
-    }
-
-    .filter-text {
-        font-size: 0.9rem;
-        text-align: center;
-        width: 100%;
-        line-height: 1.2;
-    }
-
-    .mobile-count {
-        background-color: rgba(0, 0, 0, 0.1);
-        padding: 2px 8px;
-        border-radius: 20px;
-        font-size: 0.8rem;
-        font-weight: bold;
-        line-height: 1.4;
     }
 
     /* Fix instruction numbers */
@@ -2485,85 +2630,129 @@ h1 {
         transform: translateY(-50%) scale(1.1);
         box-shadow: 0 4px 8px rgba(0, 119, 217, 0.3);
     }
-
-    /* Modal footer adjustments */
-    .modal-footer {
-        display: none !important; /* Hide the modal footer on mobile */
+    
+    /* Optimize mobile list styling */
+    .ingredients-list li,
+    .instructions-list li {
+        transition: none !important;
+        transform: none !important;
+        animation: none !important;
+        will-change: auto !important;
+        position: relative !important;
+        box-shadow: none !important;
+        -webkit-transform: none !important;
+        border-radius: 8px !important; 
+        margin-bottom: 8px !important;
+        backface-visibility: hidden !important;
+        -webkit-backface-visibility: hidden !important;
+        text-rendering: optimizeSpeed !important;
+        -webkit-transform: translate3d(0, 0, 0) !important;
+        -webkit-tap-highlight-color: transparent !important;
     }
-
-    .print-btn {
-        position: fixed;
-        bottom: 15px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: auto;
-        max-width: none;
-        font-size: 0.9rem;
-        padding: 10px 20px;
-        border-radius: 25px;
+    
+    /* Make list item before elements non-interactive to touch events */
+    .ingredients-list li::before,
+    .instructions-list li::before {
+        pointer-events: none !important;
+    }
+    
+    /* Clean up ingredient list item styling */
+    .ingredients-list li {
+        padding: 10px 10px 10px 32px !important;
+        position: relative !important;
+        margin-bottom: 6px !important;
+        border-radius: 8px !important;
+    }
+    
+    .ingredients-list li::before {
+        content: '•';
+        position: absolute !important;
+        left: 14px !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        color: var(--primary);
+        font-size: 1.2rem;
+    }
+    
+    /* Clean up instruction list item styling */
+    .instructions-list li {
+        padding: 12px 12px 12px 48px !important;
+        position: relative !important;
+        margin-bottom: 8px !important;
+        border-radius: 8px !important;
+    }
+    
+    .instructions-list li::before {
+        counter-increment: inst-counter;
+        content: counter(inst-counter);
+        position: absolute !important;
+        left: 10px !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
         background: var(--primary);
         color: white;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-        z-index: 100;
+        width: 28px !important;
+        height: 28px !important;
+        border-radius: 50% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
     }
-
-    .print-btn::before {
-        font-size: 1rem;
+    
+    /* Maintain alternating backgrounds */
+    .ingredients-list li:nth-child(even),
+    .instructions-list li:nth-child(even) {
+        background-color: rgba(0, 119, 217, 0.1) !important;
     }
-
-    .modal-body li {
-        font-size: 0.85rem;
+    
+    .ingredients-list li:nth-child(odd),
+    .instructions-list li:nth-child(odd) {
+        background-color: transparent !important;
+    }
+    
+    [data-theme="dark"] .ingredients-list li:nth-child(even),
+    [data-theme="dark"] .instructions-list li:nth-child(even) {
+        background-color: rgba(0, 119, 217, 0.25) !important;
+    }
+    
+    [data-theme="dark"] .ingredients-list li:nth-child(odd),
+    [data-theme="dark"] .instructions-list li:nth-child(odd) {
+        background-color: transparent !important;
+    }
+    
+    /* Override any hover/active styles */
+    .ingredients-list li:hover,
+    .ingredients-list li:active,
+    .ingredients-list li:focus,
+    .instructions-list li:hover,
+    .instructions-list li:active,
+    .instructions-list li:focus {
+        transform: none !important;
+        box-shadow: none !important;
+    }
+    
+    /* Swipe indicator adjustments */
+    .swipe-indicator {
+        width: 36px;
+        height: 36px;
+        font-size: 18px;
+    }
+    
+    .swipe-indicator-left {
+        left: 8px;
+    }
+    
+    .swipe-indicator-right {
+        right: 8px;
+    }
+    
+    .swipe-hint {
+        padding: 8px 12px;
+        font-size: 12px;
     }
 }
 
-/* Desktop modal styles */
-.modal-content {
-    max-width: 800px;
-    width: 90%;
-    background: var(--card);
-    border-radius: var(--border-radius-card);
-}
-
-.instructions-list li {
-    position: relative;
-    margin-bottom: 12px;
-    padding: 16px 16px 16px 56px;
-    background-color: rgba(0, 119, 217, 0.05);
-    border-radius: 12px;
-    transition: all 0.3s ease;
-}
-
-.instructions-list li::before {
-    content: counter(inst-counter);
-    position: absolute;
-    left: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 32px;
-    height: 32px;
-    background: var (--primary);
-    color: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    font-size: 1rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s ease;
-}
-
-.instructions-list li:hover {
-    background-color: rgba(0, 119, 217, 0.1);
-    transform: translateY(-2px);
-}
-
-.instructions-list li:hover::before {
-    transform: translateY(-50%) scale(1.1);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-}
-
-/* Add tablet-specific adjustments */
+/* Tablet-specific adjustments */
 @media (min-width: 768px) and (max-width: 1024px) {
     .mobile-filter-panel {
         width: calc(100% - 40px);
@@ -2631,1080 +2820,61 @@ h1 {
     }
 }
 
-/* Desktop modal footer buttons */
-.modal-footer {
-    display: flex;
-    justify-content: space-between;
-    padding: 20px;
-}
+/* Remove hover effects on touch devices */
+@media (hover: none) {
+    .recipe-card:hover {
+        transform: none;
+        box-shadow: var(--shadow-md);
+    }
 
-.modal-footer .print-btn {
-    position: relative;
-    width: auto;
-    padding: 12px 25px;
-    background: var(--secondary);
-    color: var(--primary-dark);
-    border-radius: var(--border-radius-button);
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: var(--transition-bounce);
-    max-width: none;
-    margin: 0;
-}
-
-.modal-footer .next-btn {
-    padding: 12px 25px;
-    background: var(--primary);
-    color: white;
-    border: none;
-    border-radius: var(--border-radius-button);
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: var(--transition-bounce);
-}
-
-.next-btn::after {
-    content: '→';
-    font-size: 1.2em;
-}
-
-@media (hover: hover) {
-    .modal-footer .print-btn:hover,
-    .modal-footer .next-btn:hover {
-        transform: translateY(-3px);
+    [data-theme="dark"] .recipe-card:hover {
+        transform: none;
         box-shadow: var(--shadow-md);
     }
 }
 
-/* Improved card animations */
-.recipe-card {
-    /* ...existing code... */
-    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
-                box-shadow 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
+/*=================================
+  10. Accessibility & Print 
+=================================*/
 
-@media (hover: hover) {
-    .recipe-card:hover {
-        transform: translateY(-8px) scale(1.01);
-        box-shadow: var(--card-hover-shadow);
-    }
-}
-
-/* Animation keyframes for cards */
-@keyframes cardEnter {
-    0% {
-        opacity: 0;
-        transform: scale(0.95) translateY(10px);
-    }
-    100% {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-    }
-}
-
-.recipe-card {
-    animation: cardEnter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
-}
-
-/* Stagger card animations */
-.recipe-card:nth-child(1) { animation-delay: 0.1s; }
-.recipe-card:nth-child(2) { animation-delay: 0.15s; }
-.recipe-card:nth-child(3) { animation-delay: 0.2s; }
-.recipe-card:nth-child(4) { animation-delay: 0.25s; }
-.recipe-card:nth-child(5) { animation-delay: 0.3s; }
-/* ...continue pattern for more cards */
-
-/* Remove vanilla print button */
-button[onclick*="print"] {
-    display: none !important;
-}
-
-/* ----- Swipe Indicators ----- */
-.swipe-indicator {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background-color: rgba(0, 119, 217, 0.8);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 20px;
-    opacity: 0.7;
-    z-index: 100;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    pointer-events: none; /* Don't block touch events */
-}
-
-.swipe-indicator-left {
-    left: 12px;
-    animation: fadeInLeft 0.5s forwards;
-}
-
-.swipe-indicator-right {
-    right: 12px;
-    animation: fadeInRight 0.5s forwards;
-}
-
-@keyframes fadeInLeft {
-    from { opacity: 0; transform: translate(-10px, -50%); }
-    to { opacity: 0.7; transform: translateY(-50%); }
-}
-
-@keyframes fadeInRight {
-    from { opacity: 0; transform: translate(10px, -50%); }
-    to { opacity: 0.7; transform: translateY(-50%); }
-}
-
-.swipe-indicator.pulse {
-    animation: pulsate 1s ease-out;
-}
-
-@keyframes pulsate {
-    0% { transform: translateY(-50%) scale(1); opacity: 0.7; }
-    50% { transform: translateY(-50%) scale(1.2); opacity: 1; }
-    100% { transform: translateY(-50%) scale(1); opacity: 0.7; }
-}
-
-/* Swipe hint overlay */
-.swipe-hint {
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    background-color: rgba(0, 0, 0, 0.7);
-    color: white;
-    padding: 10px 15px;
-    border-radius: 20px;
-    font-size: 14px;
-    opacity: 0;
-    transition: all 0.3s ease;
-    z-index: 150;
-    white-space: nowrap;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
-}
-
-.swipe-hint.show {
-    opacity: 0.9;
-    transform: translateX(-50%) translateY(0);
-}
-
-/* Dark mode adjustments */
-[data-theme="dark"] .swipe-indicator {
-    background-color: rgba(0, 119, 217, 0.8);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-}
-
-[data-theme="dark"] .swipe-hint {
-    background-color: rgba(0, 0, 0, 0.8);
-    box-shadow: 0 0 15px rgba(0, 119, 217, 0.6), 0 0 0 1px rgba(0, 119, 217, 0.4);
-    border: 1px solid rgba(0, 119, 217, 0.6);
-}
-
-[data-theme="dark"] .swipe-hint.show {
-    opacity: 0.95; /* Slightly more visible in dark mode */
-}
-
-/* Mobile specific adjustments */
-@media (max-width: 768px) {
-    .swipe-indicator {
-        width: 36px;
-        height: 36px;
-        font-size: 18px;
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
     }
     
-    .swipe-indicator-left {
-        left: 8px;
-    }
-    
-    .swipe-indicator-right {
-        right: 8px;
-    }
-    
-    .swipe-hint {
-        padding: 8px 12px;
-        font-size: 12px;
-    }
-}
-
-/* Hide indicators when not needed */
-.modal-content:not(.can-swipe) .swipe-indicator,
-.modal-content:not(.can-swipe) .swipe-hint {
-    display: none;
-}
-
-/* Add these rules after the existing list styling */
-
-/* Alternating list backgrounds and mobile-specific list styling */
-@media (max-width: 768px) {
-    /* Remove hover effects on mobile */
-    .ingredients-list li:hover,
-    .instructions-list li:hover {
-        background-color: transparent;
-        transform: none;
-        box-shadow: none;
-        padding-left: inherit;
-    }
-    
-    /* Apply alternating backgrounds instead */
-    .ingredients-list li:nth-child(even) {
-        background-color: rgba(0, 119, 217, 0.1);
-        border-radius: 20px;
-    }
-    
-    .instructions-list li:nth-child(even) {
-        background-color: rgba(0, 119, 217, 0.1);
-        border-radius: 12px;
-    }
-    
-    [data-theme="dark"] .ingredients-list li:nth-child(even),
-    [data-theme="dark"] .instructions-list li:nth-child(even) {
-        background-color: rgba(0, 119, 217, 0.25);
-    }
-    
-    /* Prevent hover effects from getting re-applied */
-    .ingredients-list li:hover,
-    .ingredients-list li:active,
-    .instructions-list li:hover,
-    .instructions-list li:active {
-        background-color: inherit !important;
-        transform: none !important;
-        box-shadow: none !important;
-    }
-}
-
-/* Optimize modal performance */
-.modal-content {
-    will-change: transform, opacity;
-    backface-visibility: hidden;
-}
-
-.modal-body {
-    overscroll-behavior: contain;
-    -webkit-overflow-scrolling: touch;
-}
-
-/* Improve mobile list styling - add after existing list styles */
-@media (max-width: 768px) {
-    /* Completely disable ALL hover effects and animations on ingredients and instructions lists */
-    .ingredients-list li,
-    .instructions-list li {
-        /* Prevent transitions and transforms completely */
-        transition: none !important;
-        transform: none !important;
+    body::after {
         animation: none !important;
-        will-change: auto !important;
-        
-        /* Stabilize position and dimensions */
-        position: relative !important;
-        box-shadow: none !important;
-        -webkit-transform: none !important;
-        
-        /* Force mobile-specific styling */
-        border-radius: 8px !important; 
-        margin-bottom: 8px !important;
-        backface-visibility: hidden !important;
-        -webkit-backface-visibility: hidden !important;
-        
-        /* Prevent text from jumping */
-        text-rendering: optimizeSpeed !important;
-        
-        /* Turn off hardware acceleration for list items */
-        -webkit-transform: translate3d(0, 0, 0) !important;
     }
     
-    /* Ensure consistent padding for list items to prevent jittering */
-    .ingredients-list li {
-        padding: 10px 10px 10px 36px !important;
+    .recipe-card {
+        transition: none !important;
     }
     
-    .instructions-list li {
-        padding: 12px 10px 12px 46px !important;
-    }
-    
-    /* Ensure the bullets and numbers stay in consistent positions */
-    .ingredients-list li::before {
-        transform: none !important;
-        left: 10px !important;
-        top: 10px !important;
-        position: absolute !important;
-    }
-    
-    .instructions-list li::before {
-        transform: none !important;
-        left: 10px !important;
-        top: 10px !important;
-        position: absolute !important;
-        width: 28px !important;
-        height: 28px !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-    }
-    
-    /* Make alternating backgrounds more stable */
-    .ingredients-list li:nth-child(even),
-    .instructions-list li:nth-child(even) {
-        background-color: rgba(0, 119, 217, 0.1) !important;
-    }
-    
-    .ingredients-list li:nth-child(odd),
-    .instructions-list li:nth-child(odd) {
-        background-color: transparent !important;
-    }
-    
-    [data-theme="dark"] .ingredients-list li:nth-child(even),
-    [data-theme="dark"] .instructions-list li:nth-child(even) {
-        background-color: rgba(0, 119, 217, 0.25) !important;
-    }
-    
-    [data-theme="dark"] .ingredients-list li:nth-child(odd),
-    [data-theme="dark"] .instructions-list li:nth-child(odd) {
-        background-color: transparent !important;
-    }
-    
-    /* Prevent hover effects from getting re-applied */
-    .ingredients-list li:hover,
-    .ingredients-list li:active,
-    .instructions-list li:hover,
-    .instructions-list li:active {
-        background-color: inherit !important;
-        transform: none !important;
-        box-shadow: none !important;
+    header::before {
+        animation: none !important;
     }
 }
 
-/* Optimize modal scrolling performance */
-.modal-body {
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
-    will-change: scroll-position;
+/* View mode transition effect */
+.view-mode-changed {
+    transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1) !important;
+    position: relative;
 }
 
-/* Fix for mobile bullet point tap issues that mess up backgrounds */
-@media (max-width: 768px) {
-    /* Make list item before elements non-interactive to touch events */
-    .ingredients-list li::before,
-    .instructions-list li::before {
-        pointer-events: none !important;
-    }
-    
-    /* Clean up ingredient list item styling */
-    .ingredients-list li {
-        padding: 10px 10px 10px 32px !important;
-        position: relative !important;
-        margin-bottom: 6px !important;
-        border-radius: 8px !important;
-    }
-    
-    .ingredients-list li::before {
-        content: '•';
-        position: absolute !important;
-        left: 14px !important;
-        top: 50% !important;
-        transform: translateY(-50%) !important;
-        color: var(--primary);
-        font-size: 1.2rem;
-    }
-    
-    /* Clean up instruction list item styling */
-    .instructions-list li {
-        padding: 12px 12px 12px 48px !important;
-        position: relative !important;
-        margin-bottom: 8px !important;
-        border-radius: 8px !important;
-    }
-    
-    .instructions-list li::before {
-        counter-increment: inst-counter;
-        content: counter(inst-counter);
-        position: absolute !important;
-        left: 10px !important;
-        top: 50% !important;
-        transform: translateY(-50%) !important;
-        background: var(--primary);
-        color: white;
-        width: 28px !important;
-        height: 28px !important;
-        border-radius: 50% !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-    }
-    
-    /* Maintain alternating backgrounds */
-    .ingredients-list li:nth-child(even),
-    .instructions-list li:nth-child(even) {
-        background-color: rgba(0, 119, 217, 0.1) !important;
-    }
-    
-    .ingredients-list li:nth-child(odd),
-    .instructions-list li:nth-child(odd) {
-        background-color: transparent !important;
-    }
-    
-    [data-theme="dark"] .ingredients-list li:nth-child(even),
-    [data-theme="dark"] .instructions-list li:nth-child(even) {
-        background-color: rgba(0, 119, 217, 0.25) !important;
-    }
-    
-    [data-theme="dark"] .ingredients-list li:nth-child(odd),
-    [data-theme="dark"] .instructions-list li:nth-child(odd) {
-        background-color: transparent !important;
-    }
-    
-    /* Remove tap highlights */
-    .ingredients-list li,
-    .instructions-list li {
-        -webkit-tap-highlight-color: transparent !important;
-    }
-    
-    /* Override any hover/active styles */
-    .ingredients-list li:hover,
-    .ingredients-list li:active,
-    .ingredients-list li:focus,
-    .instructions-list li:hover,
-    .instructions-list li:active,
-    .instructions-list li:focus {
-        transform: none !important;
-        box-shadow: none !important;
-    }
-}
-
-/* Fix for mobile bullet point tap issues that mess up backgrounds */
-@media (max-width: 768px) {
-    /* Make list item before elements non-interactive to touch events */
-    .ingredients-list li::before,
-    .instructions-list li::before {
-        pointer-events: none !important;
-    }
-    
-    /* Clean up ingredient list item styling */
-    .ingredients-list li {
-        padding: 10px 10px 10px 32px !important;
-        position: relative !important;
-        margin-bottom: 6px !important;
-        border-radius: 8px !important;
-    }
-    
-    .ingredients-list li::before {
-        content: '•';
-        position: absolute !important;
-        left: 14px !important;
-        top: 50% !important;
-        transform: translateY(-50%) !important;
-        color: var(--primary);
-        font-size: 1.2rem;
-    }
-    
-    /* Clean up instruction list item styling */
-    .instructions-list li {
-        padding: 12px 12px 12px 48px !important;
-        position: relative !important;
-        margin-bottom: 8px !important;
-        border-radius: 8px !important;
-    }
-    
-    .instructions-list li::before {
-        counter-increment: inst-counter;
-        content: counter(inst-counter);
-        position: absolute !important;
-        left: 10px !important;
-        top: 50% !important;
-        transform: translateY(-50%) !important;
-        background: var(--primary);
-        color: white;
-        width: 28px !important;
-        height: 28px !important;
-        border-radius: 50% !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-    }
-    
-    /* Maintain alternating backgrounds */
-    .ingredients-list li:nth-child(even),
-    .instructions-list li:nth-child(even) {
-        background-color: rgba(0, 119, 217, 0.1) !important;
-    }
-    
-    .ingredients-list li:nth-child(odd),
-    .instructions-list li:nth-child(odd) {
-        background-color: transparent !important;
-    }
-    
-    [data-theme="dark"] .ingredients-list li:nth-child(even),
-    [data-theme="dark"] .instructions-list li:nth-child(even) {
-        background-color: rgba(0, 119, 217, 0.25) !important;
-    }
-    
-    [data-theme="dark"] .ingredients-list li:nth-child(odd),
-    [data-theme="dark"] .instructions-list li:nth-child(odd) {
-        background-color: transparent !important;
-    }
-    
-    /* Remove tap highlights */
-    .ingredients-list li,
-    .instructions-list li {
-        -webkit-tap-highlight-color: transparent !important;
-    }
-    
-    /* Override any hover/active styles */
-    .ingredients-list li:hover,
-    .ingredients-list li:active,
-    .ingredients-list li:focus,
-    .instructions-list li:hover,
-    .instructions-list li:active,
-    .instructions-list li:focus {
-        transform: none !important;
-        box-shadow: none !important;
-    }
-}
-
-/* Fix for mobile bullet point tap issues that mess up backgrounds */
-@media (max-width: 768px) {
-    /* Make list item before elements non-interactive to touch events */
-    .ingredients-list li::before,
-    .instructions-list li::before {
-        pointer-events: none !important;
-    }
-    
-    /* Clean up ingredient list item styling */
-    .ingredients-list li {
-        padding: 10px 10px 10px 32px !important;
-        position: relative !important;
-        margin-bottom: 6px !important;
-        border-radius: 8px !important;
-    }
-    
-    .ingredients-list li::before {
-        content: '•';
-        position: absolute !important;
-        left: 14px !important;
-        top: 50% !important;
-        transform: translateY(-50%) !important;
-        color: var(--primary);
-        font-size: 1.2rem;
-    }
-    
-    /* Clean up instruction list item styling */
-    .instructions-list li {
-        padding: 12px 12px 12px 48px !important;
-        position: relative !important;
-        margin-bottom: 8px !important;
-        border-radius: 8px !important;
-    }
-    
-    .instructions-list li::before {
-        counter-increment: inst-counter;
-        content: counter(inst-counter);
-        position: absolute !important;
-        left: 10px !important;
-        top: 50% !important;
-        transform: translateY(-50%) !important;
-        background: var(--primary);
-        color: white;
-        width: 28px !important;
-        height: 28px !important;
-        border-radius: 50% !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-    }
-    
-    /* Maintain alternating backgrounds */
-    .ingredients-list li:nth-child(even),
-    .instructions-list li:nth-child(even) {
-        background-color: rgba(0, 119, 217, 0.1) !important;
-    }
-    
-    .ingredients-list li:nth-child(odd),
-    .instructions-list li:nth-child(odd) {
-        background-color: transparent !important;
-    }
-    
-    [data-theme="dark"] .ingredients-list li:nth-child(even),
-    [data-theme="dark"] .instructions-list li:nth-child(even) {
-        background-color: rgba(0, 119, 217, 0.25) !important;
-    }
-    
-    [data-theme="dark"] .ingredients-list li:nth-child(odd),
-    [data-theme="dark"] .instructions-list li:nth-child(odd) {
-        background-color: transparent !important;
-    }
-    
-    /* Remove tap highlights */
-    .ingredients-list li,
-    .instructions-list li {
-        -webkit-tap-highlight-color: transparent !important;
-    }
-    
-    /* Override any hover/active styles */
-    .ingredients-list li:hover,
-    .ingredients-list li:active,
-    .ingredients-list li:focus,
-    .instructions-list li:hover,
-    .instructions-list li:active,
-    .instructions-list li:focus {
-        transform: none !important;
-        box-shadow: none !important;
-    }
-}
-
-/* Fix for mobile bullet point tap issues that mess up backgrounds */
-@media (max-width: 768px) {
-    /* Make list item before elements non-interactive to touch events */
-    .ingredients-list li::before,
-    .instructions-list li::before {
-        pointer-events: none !important;
-    }
-    
-    /* Clean up ingredient list item styling */
-    .ingredients-list li {
-        padding: 10px 10px 10px 32px !important;
-        position: relative !important;
-        margin-bottom: 6px !important;
-        border-radius: 8px !important;
-    }
-    
-    .ingredients-list li::before {
-        content: '•';
-        position: absolute !important;
-        left: 14px !important;
-        top: 50% !important;
-        transform: translateY(-50%) !important;
-        color: var(--primary);
-        font-size: 1.2rem;
-    }
-    
-    /* Clean up instruction list item styling */
-    .instructions-list li {
-        padding: 12px 12px 12px 48px !important;
-        position: relative !important;
-        margin-bottom: 8px !important;
-        border-radius: 8px !important;
-    }
-    
-    .instructions-list li::before {
-        counter-increment: inst-counter;
-        content: counter(inst-counter);
-        position: absolute !important;
-        left: 10px !important;
-        top: 50% !important;
-        transform: translateY(-50%) !important;
-        background: var(--primary);
-        color: white;
-        width: 28px !important;
-        height: 28px !important;
-        border-radius: 50% !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-    }
-    
-    /* Maintain alternating backgrounds */
-    .ingredients-list li:nth-child(even),
-    .instructions-list li:nth-child(even) {
-        background-color: rgba(0, 119, 217, 0.1) !important;
-    }
-    
-    .ingredients-list li:nth-child(odd),
-    .instructions-list li:nth-child(odd) {
-        background-color: transparent !important;
-    }
-    
-    [data-theme="dark"] .ingredients-list li:nth-child(even),
-    [data-theme="dark"] .instructions-list li:nth-child(even) {
-        background-color: rgba(0, 119, 217, 0.25) !important;
-    }
-    
-    [data-theme="dark"] .ingredients-list li:nth-child(odd),
-    [data-theme="dark"] .instructions-list li:nth-child(odd) {
-        background-color: transparent !important;
-    }
-    
-    /* Remove tap highlights */
-    .ingredients-list li,
-    .instructions-list li {
-        -webkit-tap-highlight-color: transparent !important;
-    }
-    
-    /* Override any hover/active styles */
-    .ingredients-list li:hover,
-    .ingredients-list li:active,
-    .ingredients-list li:focus,
-    .instructions-list li:hover,
-    .instructions-list li:active,
-    .instructions-list li:focus {
-        transform: none !important;
-        box-shadow: none !important;
-    }
-}
-
-/* Fix for mobile bullet point tap issues that mess up backgrounds */
-@media (max-width: 768px) {
-    /* Make list item before elements non-interactive to touch events */
-    .ingredients-list li::before,
-    .instructions-list li::before {
-        pointer-events: none !important;
-    }
-    
-    /* Clean up ingredient list item styling */
-    .ingredients-list li {
-        padding: 10px 10px 10px 32px !important;
-        position: relative !important;
-        margin-bottom: 6px !important;
-        border-radius: 8px !important;
-    }
-    
-    .ingredients-list li::before {
-        content: '•';
-        position: absolute !important;
-        left: 14px !important;
-        top: 50% !important;
-        transform: translateY(-50%) !important;
-        color: var(--primary);
-        font-size: 1.2rem;
-    }
-    
-    /* Clean up instruction list item styling */
-    .instructions-list li {
-        padding: 12px 12px 12px 48px !important;
-        position: relative !important;
-        margin-bottom: 8px !important;
-        border-radius: 8px !important;
-    }
-    
-    .instructions-list li::before {
-        counter-increment: inst-counter;
-        content: counter(inst-counter);
-        position: absolute !important;
-        left: 10px !important;
-        top: 50% !important;
-        transform: translateY(-50%) !important;
-        background: var(--primary);
-        color: white;
-        width: 28px !important;
-        height: 28px !important;
-        border-radius: 50% !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-    }
-    
-    /* Maintain alternating backgrounds */
-    .ingredients-list li:nth-child(even),
-    .instructions-list li:nth-child(even) {
-        background-color: rgba(0, 119, 217, 0.1) !important;
-    }
-    
-    .ingredients-list li:nth-child(odd),
-    .instructions-list li:nth-child(odd) {
-        background-color: transparent !important;
-    }
-    
-    [data-theme="dark"] .ingredients-list li:nth-child(even),
-    [data-theme="dark"] .instructions-list li:nth-child(even) {
-        background-color: rgba(0, 119, 217, 0.25) !important;
-    }
-    
-    [data-theme="dark"] .ingredients-list li:nth-child(odd),
-    [data-theme="dark"] .instructions-list li:nth-child(odd) {
-        background-color: transparent !important;
-    }
-    
-    /* Remove tap highlights */
-    .ingredients-list li,
-    .instructions-list li {
-        -webkit-tap-highlight-color: transparent !important;
-    }
-    
-    /* Override any hover/active styles */
-    .ingredients-list li:hover,
-    .ingredients-list li:active,
-    .ingredients-list li:focus,
-    .instructions-list li:hover,
-    .instructions-list li:active,
-    .instructions-list li:focus {
-        transform: none !important;
-        box-shadow: none !important;
-    }
-}
-
-/* Fix for mobile bullet point tap issues that mess up backgrounds */
-@media (max-width: 768px) {
-    /* Make list item before elements non-interactive to touch events */
-    .ingredients-list li::before,
-    .instructions-list li::before {
-        pointer-events: none !important;
-    }
-    
-    /* Clean up ingredient list item styling */
-    .ingredients-list li {
-        padding: 10px 10px 10px 32px !important;
-        position: relative !important;
-        margin-bottom: 6px !important;
-        border-radius: 8px !important;
-    }
-    
-    .ingredients-list li::before {
-        content: '•';
-        position: absolute !important;
-        left: 14px !important;
-        top: 50% !important;
-        transform: translateY(-50%) !important;
-        color: var(--primary);
-        font-size: 1.2rem;
-    }
-    
-    /* Clean up instruction list item styling */
-    .instructions-list li {
-        padding: 12px 12px 12px 48px !important;
-        position: relative !important;
-        margin-bottom: 8px !important;
-        border-radius: 8px !important;
-    }
-    
-    .instructions-list li::before {
-        counter-increment: inst-counter;
-        content: counter(inst-counter);
-        position: absolute !important;
-        left: 10px !important;
-        top: 50% !important;
-        transform: translateY(-50%) !important;
-        background: var(--primary);
-        color: white;
-        width: 28px !important;
-        height: 28px !important;
-        border-radius: 50% !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-    }
-    
-    /* Maintain alternating backgrounds */
-    .ingredients-list li:nth-child(even),
-    .instructions-list li:nth-child(even) {
-        background-color: rgba(0, 119, 217, 0.1) !important;
-    }
-    
-    .ingredients-list li:nth-child(odd),
-    .instructions-list li:nth-child(odd) {
-        background-color: transparent !important;
-    }
-    
-    [data-theme="dark"] .ingredients-list li:nth-child(even),
-    [data-theme="dark"] .instructions-list li:nth-child(even) {
-        background-color: rgba(0, 119, 217, 0.25) !important;
-    }
-    
-    [data-theme="dark"] .ingredients-list li:nth-child(odd),
-    [data-theme="dark"] .instructions-list li:nth-child(odd) {
-        background-color: transparent !important;
-    }
-    
-    /* Remove tap highlights */
-    .ingredients-list li,
-    .instructions-list li {
-        -webkit-tap-highlight-color: transparent !important;
-    }
-    
-    /* Override any hover/active styles */
-    .ingredients-list li:hover,
-    .ingredients-list li:active,
-    .ingredients-list li:focus,
-    .instructions-list li:hover,
-    .instructions-list li:active,
-    .instructions-list li:focus {
-        transform: none !important;
-        box-shadow: none !important;
-    }
-}
-
-/* Fix for mobile bullet point tap issues that mess up backgrounds */
-@media (max-width: 768px) {
-    /* Make list item before elements non-interactive to touch events */
-    .ingredients-list li::before,
-    .instructions-list li::before {
-        pointer-events: none !important;
-    }
-    
-    /* Clean up ingredient list item styling */
-    .ingredients-list li {
-        padding: 10px 10px 10px 32px !important;
-        position: relative !important;
-        margin-bottom: 6px !important;
-        border-radius: 8px !important;
-    }
-    
-    .ingredients-list li::before {
-        content: '•';
-        position: absolute !important;
-        left: 14px !important;
-        top: 50% !important;
-        transform: translateY(-50%) !important;
-        color: var(--primary);
-        font-size: 1.2rem;
-    }
-    
-    /* Clean up instruction list item styling */
-    .instructions-list li {
-        padding: 12px 12px 12px 48px !important;
-        position: relative !important;
-        margin-bottom: 8px !important;
-        border-radius: 8px !important;
-    }
-    
-    .instructions-list li::before {
-        counter-increment: inst-counter;
-        content: counter(inst-counter);
-        position: absolute !important;
-        left: 10px !important;
-        top: 50% !important;
-        transform: translateY(-50%) !important;
-        background: var(--primary);
-        color: white;
-        width: 28px !important;
-        height: 28px !important;
-        border-radius: 50% !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-    }
-    
-    /* Maintain alternating backgrounds */
-    .ingredients-list li:nth-child(even),
-    .instructions-list li:nth-child(even) {
-        background-color: rgba(0, 119, 217, 0.1) !important;
-    }
-    
-    .ingredients-list li:nth-child(odd),
-    .instructions-list li:nth-child(odd) {
-        background-color: transparent !important;
-    }
-    
-    [data-theme="dark"] .ingredients-list li:nth-child(even),
-    [data-theme="dark"] .instructions-list li:nth-child(even) {
-        background-color: rgba(0, 119, 217, 0.25) !important;
-    }
-    
-    [data-theme="dark"] .ingredients-list li:nth-child(odd),
-    [data-theme="dark"] .instructions-list li:nth-child(odd) {
-        background-color: transparent !important;
-    }
-    
-    /* Remove tap highlights */
-    .ingredients-list li,
-    .instructions-list li {
-        -webkit-tap-highlight-color: transparent !important;
-    }
-    
-    /* Override any hover/active styles */
-    .ingredients-list li:hover,
-    .ingredients-list li:active,
-    .ingredients-list li:focus,
-    .instructions-list li:hover,
-    .instructions-list li:active,
-    .instructions-list li:focus {
-        transform: none !important;
-        box-shadow: none !important;
-    }
-}
-
-/* Fix for mobile bullet point tap issues that mess up backgrounds */
-@media (max-width: 768px) {
-    /* Make list item before elements non-interactive to touch events */
-    .ingredients-list li::before,
-    .instructions-list li::before {
-        pointer-events: none !important;
-    }
-    
-    /* Clean up ingredient list item styling */
-    .ingredients-list li {
-        padding: 10px 10px 10px 32px !important;
-        position: relative !important;
-        margin-bottom: 6px !important;
-        border-radius: 8px !important;
-    }
-    
-    .ingredients-list li::before {
-        content: '•';
-        position: absolute !important;
-        left: 14px !important;
-        top: 50% !important;
-        transform: translateY(-50%) !important;
-        color: var(--primary);
-        font-size: 1.2rem;
-    }
-    
-    /* Clean up instruction list item styling */
-    .instructions-list li {
-        padding: 12px 12px 12px 48px !important;
-        position: relative !important;
-        margin-bottom: 8px !important;
-        border-radius: 8px !important;
-    }
-    
-    .instructions-list li::before {
-        counter-increment: inst-counter;
-        content: counter(inst-counter);
-        position: absolute !important;
-        left: 10px !important;
-        top: 50% !important;
-        transform: translateY(-50%) !important;
-        background: var(--primary);
-        color: white;
-        width: 28px !important;
-        height: 28px !important;
-        border-radius: 50% !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-    }
-    
-    /* Maintain alternating backgrounds */
-    .ingredients-list li:nth-child(even),
-    .instructions-list li:nth-child(even) {
-        background-color: rgba(0, 119, 217, 0.1) !important;
-    }
-    
-    .ingredients-list li:nth-child(odd),
-    .instructions-list li:nth-child(odd) {
-        background-color: transparent !important;
-    }
-    
-    [data-theme="dark"] .ingredients-list li:nth-child(even),
-    [data-theme="dark"] .instructions-list li:nth-child(even) {
-        background-color: rgba(0, 119, 217, 0.25) !important;
-    }
-    
-    [data-theme="dark"] .ingredients-list li:nth-child(odd),
-    [data-theme="dark"] .instructions-list li:nth-child(odd) {
-        background-color: transparent !重要;
-    }
-    
-    /* Remove tap highlights */
-    .ingredients-list li,
-    .instructions-list li {
-        -webkit-tap-highlight-color: transparent !important;
-    }
-    
-    /* Override any hover/active styles */
-    .ingredients-list li:hover,
-    .ingredients-list li:active,
-    .ingredients-list li:focus,
-    .instructions-list li:hover,
-    .instructions-list li:active,
-    .instructions-list li:focus {
-        transform: none !important;
-        box-shadow: none !important;
-    }
+.view-mode-changed::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--primary);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 2;
+    animation: viewModeFlash 0.5s ease-out forwards;
 }

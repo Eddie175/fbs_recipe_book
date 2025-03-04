@@ -283,13 +283,34 @@ const UI = {
      * Check if we're in mobile view and set appropriate defaults
      */
     checkMobileView: function() {
-        if (AppState.isMobile) {
-            const condensedViewToggle = document.getElementById('condensedViewToggle');
-            if (condensedViewToggle) {
-                condensedViewToggle.checked = true;
-                AppState.isCondensedView = true;
-                document.getElementById('recipesContainer').classList.add('compact-view');
-            }
+        const isSmallScreen = window.innerWidth <= 768;
+        AppState.isMobile = isSmallScreen;
+        
+        // Get toggles
+        const desktopCompactToggle = document.getElementById('desktopCompactToggle');
+        const condensedViewToggle = document.getElementById('condensedViewToggle');
+        const recipesContainer = document.getElementById('recipesContainer');
+        
+        // Force compact view on mobile
+        if (isSmallScreen) {
+            AppState.isCondensedView = true;
+            
+            // Update the UI toggles
+            if (condensedViewToggle) condensedViewToggle.checked = true;
+            if (desktopCompactToggle) desktopCompactToggle.checked = true;
+            
+            // Update the container class
+            if (recipesContainer) recipesContainer.classList.add('compact-view');
+        } else if (!AppState.userChangedCompactSetting) {
+            // If on desktop and user hasn't manually changed the setting, use expanded view
+            AppState.isCondensedView = false;
+            
+            // Update the UI toggles
+            if (condensedViewToggle) condensedViewToggle.checked = false;
+            if (desktopCompactToggle) desktopCompactToggle.checked = false;
+            
+            // Update the container class
+            if (recipesContainer) recipesContainer.classList.remove('compact-view');
         }
     },
 
@@ -804,11 +825,44 @@ const UI = {
      * Set up condensed view toggle
      */
     setupCondensedView: function() {
+        const desktopCompactToggle = document.getElementById('desktopCompactToggle');
         const condensedViewToggle = document.getElementById('condensedViewToggle');
         const recipesContainer = document.getElementById('recipesContainer');
 
-        if (condensedViewToggle && recipesContainer) {
+        // Track if user has manually changed the setting
+        AppState.userChangedCompactSetting = false;
+
+        // Initialize from desktop toggle
+        if (desktopCompactToggle && recipesContainer) {
             // Initialize state from toggle
+            AppState.isCondensedView = desktopCompactToggle.checked;
+            if (AppState.isCondensedView) {
+                recipesContainer.classList.add('compact-view');
+            } else {
+                recipesContainer.classList.remove('compact-view');
+            }
+
+            // Update on change
+            desktopCompactToggle.addEventListener('change', function() {
+                AppState.userChangedCompactSetting = true;
+                AppState.isCondensedView = this.checked;
+
+                // Keep mobile toggle in sync
+                if (condensedViewToggle) {
+                    condensedViewToggle.checked = this.checked;
+                }
+
+                if (this.checked) {
+                    recipesContainer.classList.add('compact-view');
+                } else {
+                    recipesContainer.classList.remove('compact-view');
+                }
+            });
+        }
+
+        // Initialize from mobile toggle
+        if (condensedViewToggle && recipesContainer) {
+            // Initialize state from mobile toggle
             if (condensedViewToggle.checked) {
                 recipesContainer.classList.add('compact-view');
                 AppState.isCondensedView = true;
@@ -816,7 +870,13 @@ const UI = {
 
             // Update on change
             condensedViewToggle.addEventListener('change', function() {
+                AppState.userChangedCompactSetting = true;
                 AppState.isCondensedView = this.checked;
+
+                // Keep desktop toggle in sync
+                if (desktopCompactToggle) {
+                    desktopCompactToggle.checked = this.checked;
+                }
 
                 if (this.checked) {
                     recipesContainer.classList.add('compact-view');
@@ -1241,13 +1301,48 @@ const UI = {
         // Handle window resize
         window.addEventListener('resize', Utilities.debounce(function() {
             const isSmallScreen = window.innerWidth <= 768;
+            const wasSmallScreen = AppState.isMobile;
             AppState.isMobile = isSmallScreen;
+            
+            // Get UI elements
+            const desktopCompactToggle = document.getElementById('desktopCompactToggle');
             const condensedViewToggle = document.getElementById('condensedViewToggle');
-
-            // Force compact view on mobile
-            if (isSmallScreen && condensedViewToggle && !condensedViewToggle.checked) {
-                condensedViewToggle.checked = true;
-                document.getElementById('recipesContainer').classList.add('compact-view');
+            const recipesContainer = document.getElementById('recipesContainer');
+            
+            // Only update view mode if screen size category changed (mobile <-> desktop)
+            if (isSmallScreen !== wasSmallScreen) {
+                // If switching TO mobile
+                if (isSmallScreen) {
+                    // Force compact view on mobile
+                    AppState.isCondensedView = true;
+                    
+                    // Update the toggles
+                    if (desktopCompactToggle) desktopCompactToggle.checked = true;
+                    if (condensedViewToggle) condensedViewToggle.checked = true;
+                    
+                    // Apply the class
+                    if (recipesContainer) recipesContainer.classList.add('compact-view');
+                } 
+                // If switching TO desktop and the user hasn't manually set the compact mode
+                else if (!AppState.userChangedCompactSetting) {
+                    // Default to expanded view on desktop
+                    AppState.isCondensedView = false;
+                    
+                    // Update the toggles
+                    if (desktopCompactToggle) desktopCompactToggle.checked = false;
+                    if (condensedViewToggle) condensedViewToggle.checked = false;
+                    
+                    // Remove the class
+                    if (recipesContainer) recipesContainer.classList.remove('compact-view');
+                }
+                
+                // Add a temporary visual indicator for the mode change
+                if (recipesContainer) {
+                    recipesContainer.classList.add('view-mode-changed');
+                    setTimeout(() => {
+                        recipesContainer.classList.remove('view-mode-changed');
+                    }, 500);
+                }
             }
         }, 250));
 
