@@ -384,6 +384,9 @@ const UI = {
         // Add swipe indicators if we have multiple recipes
         this.addSwipeIndicatorsToModal(modalContent);
 
+        // Prevent body scrolling when modal is open
+        preventBodyScroll(true);
+
         // Show modal with animation if available
         if (window.RecipeAnimations) {
             window.RecipeAnimations.animateModalOpen(modal, modalContent);
@@ -402,6 +405,9 @@ const UI = {
 
         // Setup modal scroll indication
         this.setupModalScroll();
+
+        // Set accessibility attributes
+        modal.setAttribute('aria-hidden', 'false');
     },
 
     /**
@@ -613,9 +619,8 @@ const UI = {
         const modal = document.getElementById('recipeModal');
         if (!modal) return;
 
-        // Keep hint shown state for the session
-        // We don't reset the swipeHintShown flag here anymore
-        // This ensures the hint appears only once per browsing session
+        // Re-enable body scrolling
+        preventBodyScroll(false);
 
         if (window.RecipeAnimations) {
             window.RecipeAnimations.animateModalClose(modal, modal.querySelector('.modal-content'));
@@ -628,6 +633,9 @@ const UI = {
                 modal.classList.remove('hide');
             }, 300);
         }
+
+        // Update accessibility attribute
+        modal.setAttribute('aria-hidden', 'true');
     },
 
     /**
@@ -1275,4 +1283,13 @@ const UI = {
 // Initialize application when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     UI.init();
+
+    // Get the modal element
+    const recipeModal = document.getElementById('recipeModal');
+    const modalContent = recipeModal.querySelector('.modal-content');
+
+    // Apply scroll fixes to modal content
+    enableModalScroll(modalContent);
+
+    // Remove duplicated modal event handling since it's now in UI.closeModal
 });

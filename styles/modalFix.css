@@ -1,0 +1,39 @@
+/* Modal container fixes */
+.modal {
+  -webkit-overflow-scrolling: touch; /* Enable momentum scrolling on iOS */
+  overscroll-behavior: contain; /* Prevent pull-to-refresh on mobile */
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Modal content fixes */
+.modal-content {
+  max-height: 90vh;
+  transform: translateZ(0); /* Force hardware acceleration */
+  will-change: transform; /* Hint for browser optimization */
+  overflow-y: auto; /* Enable vertical scrolling */
+  -webkit-overflow-scrolling: touch; /* Enable momentum scrolling on iOS */
+}
+
+.modal-body {
+  overflow-y: auto; /* Enable vertical scrolling */
+  -webkit-overflow-scrolling: touch; /* Enable momentum scrolling on iOS */
+  max-height: calc(80vh - 130px); /* Adjust based on header/footer height */
+}
+
+/* iOS specific fixes */
+@supports (-webkit-touch-callout: none) {
+  .modal-body {
+    touch-action: pan-y; /* Allow vertical touch scrolling */
+  }
+  
+  .modal-content {
+    /* Additional iOS specific styles */
+    touch-action: pan-y; /* Allow vertical touch scrolling */
+  }
+}
