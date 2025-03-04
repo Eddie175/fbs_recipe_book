@@ -982,8 +982,11 @@ h1 {
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    will-change: transform, opacity;
-    backface-visibility: hidden;
+}
+
+.modal.hide .modal-content {
+    transform: scale(0.9);
+    opacity: 0;
 }
 
 .modal.hide .modal-content {
