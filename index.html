@@ -5,7 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="FBS Employee Recipe Book - A collection of favorite recipes from our team">
     <title>FBS Employee Recipe Book</title>
-    <link rel="stylesheet" href="styles.css">
+    <!-- Preload critical CSS -->
+    <link rel="preload" href="css/main.css" as="style">
+    <link rel="preload" href="css/variables.css" as="style">
+    <link rel="preload" href="css/base.css" as="style">
+    
+    <!-- Main CSS file that imports all modules -->
+    <link rel="stylesheet" href="css/main.css">
     <!-- Optimize font loading -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,24 +19,22 @@
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&family=Nunito:ital,wght@0,400;0,600;0,700;1,400&display=swap" as="style">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&family=Nunito:ital,wght@0,400;0,600;0,700;1,400&display=swap">
-    <!-- Add GSAP with defer for performance -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" defer></script>
-    <!-- Add to head section -->
-    <link rel="stylesheet" href="styles/print.css" media="print">
 </head>
 <body>
-    <!-- Skip to content link for accessibility -->
-    <a href="#recipesContainer" class="skip-to-content">Skip to recipes</a>
-
     <header>
         <h1>FBS Employee Recipe Book</h1>
         <p class="subtitle">A delicious compilation of our team's favorite recipes</p>
+        
+        <!-- Theme toggle button - desktop version -->
+        <div class="theme-toggle desktop-theme-toggle" id="themeToggle" title="Toggle dark mode" aria-label="Toggle dark mode">
+            <span class="theme-toggle-icon">🌙</span>
+        </div>
     </header>
-
-    <!-- Theme toggle button -->
-    <button class="theme-toggle" id="themeToggle" title="Toggle dark mode" aria-label="Toggle dark mode">
-        🌙
-    </button>
+    
+    <!-- Theme toggle button - mobile version -->
+    <div class="theme-toggle mobile-theme-toggle" id="mobileThemeToggle" title="Toggle dark mode" aria-label="Toggle dark mode">
+        <span class="theme-toggle-icon">🌙</span>
+    </div>
 
     <div class="search-container">
         <input type="text" id="search" placeholder="Search recipes..." autocomplete="off" aria-label="Search recipes">
@@ -49,7 +53,7 @@
     
     <div class="sort-container">
         <div class="sort-controls">
-            <label for="sort-select" class="sort-label">SORT BY</label>
+            <label for="sort-select" class="sort-label">Sort by:</label>
             <select id="sort-select" class="sort-select" aria-label="Sort recipes">
                 <option value="default">Default</option>
                 <option value="alpha-asc">Name (A-Z)</option>
@@ -58,20 +62,32 @@
                 <option value="category">Category</option>
             </select>
         </div>
-        <label class="desktop-compact-toggle">
-            <input type="checkbox" id="desktopCompactToggle">
-            <span class="toggle-slider"></span>
-            <span class="toggle-label">Compact</span>
-        </label>
+        <div class="display-options">
+            <label class="toggle-switch" for="desktopCompactToggle">
+                <span>Compact View</span>
+                <div class="switch-wrapper">
+                    <input type="checkbox" id="desktopCompactToggle">
+                    <span class="switch-slider"></span>
+                </div>
+            </label>
+        </div>
     </div>
     
     <!-- Mobile sort interface -->
-    <div class="mobile-sort-interface">
+    <div class="mobile-sort-interface" role="group" aria-label="Sort options">
         <div class="mobile-sort-toggle">
-            <button class="mobile-sort-option active" data-sort="default">Default</button>
-            <button class="mobile-sort-option" data-sort="alpha-asc">A-Z</button>
-            <button class="mobile-sort-option" data-sort="alpha-desc">Z-A</button>
-            <button class="mobile-sort-option" data-sort="author">Author</button>
+            <button class="mobile-sort-option active" data-sort="default" aria-pressed="true">
+                <span>Default</span>
+            </button>
+            <button class="mobile-sort-option" data-sort="alpha-asc" aria-pressed="false">
+                <span>A to Z</span>
+            </button>
+            <button class="mobile-sort-option" data-sort="alpha-desc" aria-pressed="false">
+                <span>Z to A</span>
+            </button>
+            <button class="mobile-sort-option" data-sort="author" aria-pressed="false">
+                <span>Author</span>
+            </button>
         </div>
     </div>
 
@@ -87,25 +103,36 @@
     <!-- Mobile Filter Panel -->
     <div id="mobileFilterPanel" class="mobile-filter-panel" aria-labelledby="mobileFilterTitle">
         <div class="panel-header">
-            <h3 id="mobileFilterTitle">Filters</h3>
+            <h3 id="mobileFilterTitle">Filter Recipes</h3>
             <button class="panel-close-btn" aria-label="Close filter panel">×</button>
         </div>
-        <div class="mobile-filter-options" id="mobileFilterOptions">
-            <!-- Mobile filters will be added here by JS -->
-        </div>
-        <div class="view-options">
-            <h4>View Options</h4>
-            <div class="toggle-group">
-                <label class="toggle-switch">
-                    <input type="checkbox" id="condensedViewToggle">
-                    <span class="toggle-slider"></span>
-                    <span class="toggle-label">Compact</span>
-                </label>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="darkModeToggle">
-                    <span class="toggle-slider"></span>
-                    <span class="toggle-label">Dark Mode</span>
-                </label>
+        
+        <div class="panel-content">
+            <div class="panel-section">
+                <h4 class="section-title">Categories</h4>
+                <div class="mobile-filter-options" id="mobileFilterOptions">
+                    <!-- Mobile filters will be added here by JS -->
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h4 class="section-title">Display Options</h4>
+                <div class="settings-group">
+                    <label class="toggle-switch">
+                        <span>Compact View</span>
+                        <div class="switch-wrapper">
+                            <input type="checkbox" id="condensedViewToggle">
+                            <span class="switch-slider"></span>
+                        </div>
+                    </label>
+                    <label class="toggle-switch">
+                        <span>Dark Mode</span>
+                        <div class="switch-wrapper">
+                            <input type="checkbox" id="darkModeToggle">
+                            <span class="switch-slider"></span>
+                        </div>
+                    </label>
+                </div>
             </div>
         </div>
     </div>
@@ -140,11 +167,11 @@
         </div>
     </div>
 
-    <!-- Load JavaScript files -->
-    <script src="recipeData.js"></script>
-    <script src="animations.js"></script>
-    <script src="main.js"></script>
-    <!-- Add before closing body tag -->
+    <!-- Load JavaScript files in correct order -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="js/recipeData.js"></script>
+    <script src="js/animations.js"></script>
     <script src="js/printHandler.js"></script>
+    <script src="js/main.js"></script>
 </body>
 </html>

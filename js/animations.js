@@ -1,6 +1,6 @@
 /**
  * Recipe Book Animation System
- * Minimal version that works with GSAP
+ * Optimized for the new modular CSS structure
  */
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -148,7 +148,7 @@ function animateModalOpen(modal, content) {
             gsap.set(hint, { 
                 opacity: 0,
                 position: 'absolute',
-                bottom: '10%',  // Changed from 33% to 25%
+                bottom: '10%',
                 left: '50%',
                 xPercent: -50,
                 width: 'auto',
@@ -311,22 +311,18 @@ function animatePrevRecipe(modal, content) {
 function animateNoResults(container) {
     const noResults = document.createElement('div');
     noResults.className = 'no-results';
-    noResults.style.cssText = `
-        position: relative;
-        overflow: hidden;
-        width: 100%;
-        text-align: center;
-        padding: 2rem;
-        font-size: 1.2rem;
-        color: #666;
-        margin: 2rem auto;
-    `;
     
     noResults.innerHTML = `
-        <div class="no-results-content" style="position: relative; z-index: 2;">
+        <div class="no-results-content">
             No recipes found. Try adjusting your search or filters.
         </div>
-        <div class="sweep-effect" style="
+        <div class="sweep-effect"></div>
+    `;
+    
+    // Add styled sweep effect with style consistent with our modular CSS design
+    const sweepEffect = noResults.querySelector('.sweep-effect');
+    if (sweepEffect) {
+        sweepEffect.style.cssText = `
             position: absolute;
             top: 0;
             left: 0;
@@ -339,8 +335,8 @@ function animateNoResults(container) {
                 transparent
             );
             z-index: 1;
-        "></div>
-    `;
+        `;
+    }
     
     // Clear container and add no results message
     container.innerHTML = '';

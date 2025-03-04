@@ -1,0 +1,80 @@
+/* ==============================================
+   Theme Toggle Component
+   ============================================== */
+
+/* Base Theme Toggle Button
+   -------------------------------------------- */
+.theme-toggle {
+    align-items: center;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: none;
+    border-radius: 50%;
+    color: var(--text);
+    cursor: pointer;
+    display: flex;
+    height: 40px;
+    justify-content: center;
+    transition: var(--transition-bounce);
+    width: 40px;
+}
+
+.theme-toggle:active {
+    transform: scale(0.95);
+}
+
+/* Toggle Icon
+   -------------------------------------------- */
+.theme-toggle-icon {
+    align-items: center;
+    bottom: 0px;
+    display: flex;
+    font-size: 1.4rem;
+    height: 24px;
+    justify-content: center;
+    line-height: 1;
+    position: relative;
+    right: 1px;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 24px;
+}
+
+.theme-toggle:active .theme-toggle-icon {
+    transform: rotate(180deg) scale(0.95);
+}
+
+/* Desktop Variant
+   -------------------------------------------- */
+.desktop-theme-toggle {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    color: white;
+    position: absolute;
+    right: 20px;
+    top: 20px;
+}
+
+.desktop-theme-toggle:hover {
+    background: rgba(255, 255, 255, 0.3);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+/* Theme-specific Styles
+   -------------------------------------------- */
+[data-theme="dark"] .theme-toggle {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Animation
+   -------------------------------------------- */
+@keyframes toggleRotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+[data-theme="dark"] .theme-toggle-icon,
+[data-theme="light"] .theme-toggle-icon {
+    animation: toggleRotate 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}

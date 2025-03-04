@@ -1,0 +1,193 @@
+/* ----- Container Layout ----- */
+.sort-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 15px;
+}
+
+/* ----- Shared Control Styles ----- */
+.sort-controls,
+.desktop-compact-toggle {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 8px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 119, 217, 0.4);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    height: 40px;
+}
+
+/* ----- Sort Select Styles ----- */
+.sort-select {
+    appearance: none;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    border-radius: 8px;
+    color: var(--text);
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    height: 24px;
+    padding: 0 35px 0 12px;
+    transition: var(--transition-normal);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%230077d9' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 16px;
+}
+
+.sort-select:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+.sort-select:focus {
+    outline: none;
+    background-color: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 0 0 2px rgba(0, 119, 217, 0.3);
+}
+
+.sort-select option {
+    background-color: var(--card);
+    color: var(--text);
+    padding: 8px;
+}
+
+/* ----- Toggle Switch Base Styles ----- */
+.toggle-switch,
+.desktop-compact-toggle {
+    min-width: 140px;
+    justify-content: space-between;
+}
+
+.toggle-switch input[type="checkbox"],
+.desktop-compact-toggle input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: relative;
+    display: inline-block;
+    width: 32px;
+    height: 18px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 20px;
+    margin-right: 10px;
+    transition: 0.3s ease;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    border-radius: 50%;
+    transition: 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+input:checked + .toggle-slider {
+    background-color: var(--primary);
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(14px);
+}
+
+/* ----- View Options Section ----- */
+.view-options {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(0, 119, 217, 0.2);
+}
+
+.view-options h4 {
+    color: var(--text);
+    margin-bottom: 8px;
+    font-size: 1rem;
+}
+
+.toggle-group {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.toggle-switch {
+    flex: 1 1 0;
+    min-width: 130px;
+    padding: 6px 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(0, 119, 217, 0.3);
+    border-radius: 12px;
+    transition: var(--transition-normal);
+}
+
+.toggle-switch:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.toggle-label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text);
+    white-space: nowrap;
+    width: 85px;
+}
+
+/* ----- Dark Mode Styles ----- */
+[data-theme="dark"] {
+    /* Controls */
+    .sort-controls,
+    .desktop-compact-toggle {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Labels and text */
+    .sort-label,
+    .toggle-label,
+    .view-options h4 {
+        color: var(--white);
+    }
+
+    /* Sort select */
+    .sort-select {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%233a9aea' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+        color: var(--white);
+    }
+
+    /* Toggle components */
+    .toggle-switch {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .toggle-switch:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .toggle-slider {
+        background-color: rgba(0, 0, 0, 0.4);
+    }
+
+    /* View options */
+    .view-options {
+        border-top-color: rgba(255, 255, 255, 0.1);
+    }
+}

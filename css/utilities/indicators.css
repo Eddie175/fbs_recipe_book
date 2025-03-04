@@ -1,0 +1,114 @@
+/* =============================================
+   Visual Indicators and Feedback Components
+   ============================================= */
+
+/* Loading State Component
+   ----------------------------------------- */
+.loading-state {
+    /* Layout */
+    display: flex;
+    flex-direction: column;
+    grid-column: 1 / -1;
+    align-items: center;
+    justify-content: center;
+    
+    /* Spacing */
+    padding: 50px 20px;
+    gap: 15px;
+    
+    /* Typography */
+    text-align: center;
+}
+
+.loading-spinner {
+    /* Box Model */
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    
+    /* Border and Shape */
+    border: 4px solid rgba(0, 119, 217, 0.3);
+    border-radius: 50%;
+    border-top-color: var(--primary);
+    
+    /* Animation */
+    animation: spin 1s ease-in-out infinite;
+}
+
+/* Touch Navigation Indicators
+   ----------------------------------------- */
+.touch-indicator {
+    /* Positioning */
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 100;
+    
+    /* Box Model */
+    width: 40px;
+    height: 80px;
+    
+    /* Visual */
+    background-color: rgba(0, 0, 0, 0.15);
+    border-radius: 40px;
+    
+    /* Layout */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    /* Interaction */
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.touch-indicator-left {
+    left: 10px;
+}
+
+.touch-indicator-right {
+    right: 10px;
+}
+
+.touch-indicator-icon {
+    color: white;
+    font-size: 1.5rem;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.touch-indicator.show {
+    opacity: 0.8;
+    transform: translateY(-50%) scale(1.1);
+}
+
+/* Copy Operation Feedback
+   ----------------------------------------- */
+.copy-tooltip {
+    /* Positioning */
+    position: absolute;
+    right: 50px;
+    top: 10px;
+    
+    /* Box Model */
+    padding: 5px 10px;
+    
+    /* Visual */
+    background-color: rgba(0, 0, 0, 0.7);
+    border-radius: 5px;
+    
+    /* Typography */
+    color: white;
+    font-size: 0.8rem;
+    
+    /* Interaction */
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.copy-tooltip.show {
+    opacity: 1;
+    visibility: visible;
+}

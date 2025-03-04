@@ -281,3 +281,112 @@
         }
     }
 }
+
+/* ----- Print Styles ----- */
+@media print {
+    /* Reset all backgrounds and shadows */
+    * {
+        background: transparent !important;
+        color: #000 !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+        transition: none !important;
+        break-inside: avoid;
+    }
+
+    /* Hide non-essential elements */
+    .theme-toggle,
+    .mobile-filter-btn,
+    .search-container,
+    .filter-container,
+    .sort-container,
+    .mobile-sort-interface,
+    .cards-container,
+    .modal-backdrop,
+    .close,
+    .copy-ingredients-btn,
+    .print-btn,
+    .mobile-print-btn {
+        display: none !important;
+    }
+
+    /* Modal print styling */
+    .modal {
+        position: relative !important;
+        display: block !important;
+        height: auto !important;
+        overflow: visible !important;
+        background: none !important;
+    }
+
+    .modal-content {
+        position: relative !important;
+        width: 100% !important;
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+        box-shadow: none !important;
+        border: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .modal-header {
+        padding: 0 0 1cm !important;
+        break-after: avoid;
+    }
+
+    .modal-body {
+        padding: 0 !important;
+        overflow: visible !important;
+    }
+
+    /* Recipe content print styling */
+    .ingredients-title,
+    .instructions-title {
+        break-after: avoid;
+        margin-top: 1cm;
+        color: #000 !important;
+        border-bottom: 1px solid #000;
+    }
+
+    .ingredients-list,
+    .instructions-list {
+        break-inside: avoid;
+        margin: 0.5cm 0;
+    }
+
+    .ingredients-list li,
+    .instructions-list li {
+        break-inside: avoid;
+        page-break-inside: avoid;
+        background: none !important;
+        padding: 0.2cm 0 0.2cm 1cm !important;
+    }
+
+    .instructions-list li::before {
+        position: absolute;
+        left: 0;
+        background: none !important;
+        border: 1px solid #000;
+        color: #000 !important;
+    }
+
+    /* Page layout optimizations */
+    @page {
+        margin: 1.5cm;
+        size: auto;
+    }
+
+    body {
+        min-width: initial !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    /* Ensure URLs are displayed in prints */
+    a[href^="http"]:after {
+        content: " (" attr(href) ")";
+        font-size: 0.8em;
+    }
+}

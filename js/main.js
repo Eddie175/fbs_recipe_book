@@ -546,6 +546,67 @@ const UI = {
                 mobileFilterPanel.classList.toggle('show');
             }
         });
+
+        // Update mobile filter panel
+        const mobilePanel = document.querySelector('.mobile-filter-options');
+        if (mobilePanel) {
+            mobilePanel.innerHTML = '';
+
+            Object.keys(categoryCounts).forEach(category => {
+                const btn = document.createElement('button');
+                btn.className = category === AppState.currentFilter 
+                    ? 'mobile-filter-btn-item active' 
+                    : 'mobile-filter-btn-item';
+                btn.dataset.category = category;
+
+                const icon = Utilities.getCategoryEmoji(category);
+
+                btn.innerHTML = `
+                    <div class="mobile-filter-item-content">
+                        <div class="filter-emoji">${icon}</div>
+                        <div class="filter-text">${Utilities.getCategoryName(category)}</div>
+                        <div class="mobile-count">${categoryCounts[category]}</div>
+                    </div>
+                `;
+
+                // Add event listener
+                btn.addEventListener('click', function() {
+                    // Update mobile UI
+                    mobilePanel.querySelectorAll('.mobile-filter-btn-item').forEach(b => {
+                        b.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    
+                    // Update filter state
+                    AppState.currentFilter = this.dataset.category;
+
+                    // Update desktop UI
+                    document.querySelectorAll('.filter-btn').forEach(btn => {
+                        const isActive = btn.dataset.category === AppState.currentFilter;
+                        btn.classList.toggle('active', isActive);
+                        btn.setAttribute('aria-pressed', isActive);
+                    });
+
+                    // Refresh recipe display with animation if available
+                    if (window.RecipeAnimations) {
+                        window.RecipeAnimations.transitionCards(() => {
+                            const container = document.getElementById('recipesContainer');
+                            container.innerHTML = '';
+                            UI.displayRecipes();
+                        });
+                    } else {
+                        const container = document.getElementById('recipesContainer');
+                        container.innerHTML = '';
+                        UI.displayRecipes();
+                    }
+
+                    // Close mobile filter panel
+                    document.getElementById('mobileFilterPanel').classList.remove('show');
+                });
+
+                mobilePanel.appendChild(btn);
+            });
+        }
     },
 
     /**
@@ -581,24 +642,34 @@ const UI = {
      */
     setupCondensedView: function() {
         const condensedViewToggle = document.getElementById('condensedViewToggle');
+        const desktopCompactToggle = document.getElementById('desktopCompactToggle');
         const recipesContainer = document.getElementById('recipesContainer');
 
-        if (condensedViewToggle && recipesContainer) {
-            // Initialize state from toggle
-            if (condensedViewToggle.checked) {
-                recipesContainer.classList.add('compact-view');
-                AppState.isCondensedView = true;
-            }
+        const updateCompactView = (isCompact) => {
+            AppState.isCondensedView = isCompact;
+            recipesContainer.classList.toggle('compact-view', isCompact);
 
-            // Update on change
+            // Sync both toggles
+            if (condensedViewToggle) condensedViewToggle.checked = isCompact;
+            if (desktopCompactToggle) desktopCompactToggle.checked = isCompact;
+        };
+
+        // Initialize compact view based on mobile state
+        if (AppState.isMobile) {
+            updateCompactView(true);
+        }
+
+        // Handle mobile toggle
+        if (condensedViewToggle) {
             condensedViewToggle.addEventListener('change', function() {
-                AppState.isCondensedView = this.checked;
+                updateCompactView(this.checked);
+            });
+        }
 
-                if (this.checked) {
-                    recipesContainer.classList.add('compact-view');
-                } else {
-                    recipesContainer.classList.remove('compact-view');
-                }
+        // Handle desktop toggle
+        if (desktopCompactToggle) {
+            desktopCompactToggle.addEventListener('change', function() {
+                updateCompactView(this.checked);
             });
         }
     },
@@ -682,44 +753,54 @@ const UI = {
      * Set up all event listeners
      */
     setupEventListeners: function() {
-        // Theme toggle
+        // Theme toggle - desktop
         const themeToggle = document.getElementById('themeToggle');
+        const mobileThemeToggle = document.getElementById('mobileThemeToggle');
+
+        const updateTheme = (newTheme) => {
+            document.documentElement.setAttribute('data-theme', newTheme);
+            const emoji = newTheme === 'dark' ? '☀️' : '🌙';
+            const nextTheme = newTheme === 'dark' ? 'light' : 'dark';
+            
+            [themeToggle, mobileThemeToggle].forEach(toggle => {
+                if (toggle) {
+                    toggle.querySelector('.theme-toggle-icon').textContent = emoji;
+                    toggle.title = `Toggle ${nextTheme} mode`;
+                    toggle.setAttribute('aria-label', `Toggle ${nextTheme} mode`);
+                }
+            });
+
+            // Sync with mobile panel toggle
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            if (darkModeToggle) {
+                darkModeToggle.checked = newTheme === 'dark';
+            }
+        };
+
         if (themeToggle) {
-            themeToggle.addEventListener('click', function() {
+            themeToggle.addEventListener('click', () => {
                 const currentTheme = document.documentElement.getAttribute('data-theme');
                 const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                updateTheme(newTheme);
+            });
+        }
 
-                document.documentElement.setAttribute('data-theme', newTheme);
-                themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
-                themeToggle.title = `Toggle ${newTheme === 'dark' ? 'light' : 'dark'} mode`;
-                themeToggle.setAttribute('aria-label', `Toggle ${newTheme === 'dark' ? 'light' : 'dark'} mode`);
-
-                // Sync with mobile toggle
-                const darkModeToggle = document.getElementById('darkModeToggle');
-                if (darkModeToggle) {
-                    darkModeToggle.checked = newTheme === 'dark';
-                }
+        if (mobileThemeToggle) {
+            mobileThemeToggle.addEventListener('click', () => {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                updateTheme(newTheme);
             });
         }
 
         // Mobile dark mode toggle
         const darkModeToggle = document.getElementById('darkModeToggle');
         if (darkModeToggle) {
-            // Initialize state
             darkModeToggle.checked = document.documentElement.getAttribute('data-theme') === 'dark';
-
-            // Handle changes
+            
             darkModeToggle.addEventListener('change', function() {
                 const newTheme = this.checked ? 'dark' : 'light';
-                document.documentElement.setAttribute('data-theme', newTheme);
-
-                // Sync with main toggle
-                const themeToggle = document.getElementById('themeToggle');
-                if (themeToggle) {
-                    themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
-                    themeToggle.title = `Toggle ${newTheme === 'dark' ? 'light' : 'dark'} mode`;
-                    themeToggle.setAttribute('aria-label', `Toggle ${newTheme === 'dark' ? 'light' : 'dark'} mode`);
-                }
+                updateTheme(newTheme);
             });
         }
 

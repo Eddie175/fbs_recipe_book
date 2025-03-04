@@ -1,0 +1,122 @@
+@charset "UTF-8";
+
+/*----------------------------------------
+  Design System - CSS Custom Properties
+----------------------------------------*/
+
+:root {
+    /*----------------
+     * Color System
+     *----------------*/
+    /* Primary Colors */
+    --primary: #2563eb;
+    --primary-rgb: 37, 99, 235;
+    --primary-light: #3b82f6;
+    --primary-lighter: hsl(208, 100%, 85%);
+    --primary-dark: hsl(208, 100%, 45%);
+
+    /* Surface Colors */
+    --surface-color: rgba(255, 255, 255, 0.95);
+    --card-bg: #ffffff;
+    --hover-bg: #f3f4f6;
+    --badge-bg: #f3f4f6;
+    --badge-bg-dark: rgba(0, 0, 0, 0.05);
+
+    /* Text Colors */
+    --text-primary: #111827;
+    --text-secondary: #4b5563;
+
+    /* Border Colors */
+    --border-rgb: 0, 0, 0;
+    --border-alpha: 0.1;
+
+    /*----------------
+     * Layout & Spacing
+     *----------------*/
+    --panel-radius: 20px;
+    --item-radius: 12px;
+    --panel-padding: 16px;
+    --border-radius-card: 12px;
+    --border-radius-button: 12px;
+
+    /*----------------
+     * Glass Effects
+     *----------------*/
+    --card-glass: rgba(255, 255, 255, 0.529);
+    --card-glass-dark: rgba(34, 34, 48, 0.538);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --glass-border-dark: rgba(255, 255, 255, 0.08);
+    --filter-btn-border: rgba(255, 255, 255, 0.4);
+    --modal-backdrop: rgba(0, 0, 0, 0.4);
+
+    /*----------------
+     * Shadows & Effects
+     *----------------*/
+    --shadow-sm: 0 5px 10px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 8px 16px rgba(0, 0, 0, 0.12);
+    --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.16);
+    --shadow-glass: 0 4px 20px rgba(0, 0, 0, 0.1);
+    --glow-effect: 0 0 10px rgba(0, 119, 217, 0.3);
+    --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.2);
+    --card-hover-shadow: 0 20px 40px rgba(0, 0, 0, 0.2),
+                        0 0 0 1px rgba(255, 255, 255, 0.8),
+                        0 0 0 3px rgba(0, 119, 217, 0.15),
+                        0 0 20px rgba(0, 119, 217, 0.1);
+
+    /*----------------
+     * Animations
+     *----------------*/
+    --transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-normal: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    --card-transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1),
+                      box-shadow 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+/*----------------
+ * Dark Theme
+ *----------------*/
+[data-theme="dark"] {
+    /* Color System */
+    --primary: #0077d9;
+    --primary-light: #3a9aea;
+    --primary-dark: #0060b0;
+    --secondary: #b0d4ff;
+
+    /* Surface Colors */
+    --background: rgba(18, 18, 24, 0.95);
+    --card: rgba(34, 34, 48, 0.95);
+    --surface-color: rgba(30, 30, 40, 0.95);
+    --card-bg: rgba(31, 41, 55, 0.95);
+    --hover-bg: rgba(55, 65, 81, 0.95);
+    --badge-bg: rgba(55, 65, 81, 0.95);
+
+    /* Text Colors */
+    --text: #f0f0f0;
+    --text-light: #c5c5c5;
+    --text-dark: #f5f5f5;
+    --text-primary: #f9fafb;
+    --text-secondary: #d1d5db;
+
+    /* Border Colors */
+    --border-rgb: 255, 255, 255;
+
+    /* Glass Effects */
+    --card-glass: rgba(34, 34, 48, 0.8);
+    --card-glass-dark: rgba(24, 24, 36, 0.8);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-border-dark: rgba(255, 255, 255, 0.05);
+    --modal-backdrop: rgba(0, 0, 0, 0.6);
+
+    /* Shadows & Effects */
+    --shadow-sm: 0 5px 10px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 8px 16px rgba(0, 0, 0, 0.25);
+    --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.3);
+    --shadow-glass: 0 4px 20px rgba(0, 0, 0, 0.25);
+    --glow-effect: 0 0 15px rgba(0, 119, 217, 0.4);
+    --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.2);
+    --card-hover-shadow: 0 30px 50px rgba(0, 0, 0, 0.4),
+                        0 0 0 1px rgba(255, 255, 255, 0.2),
+                        0 0 0 4px rgba(0, 119, 217, 0.3),
+                        0 0 30px rgba(0, 119, 217, 0.2);
+}

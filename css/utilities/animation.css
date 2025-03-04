@@ -1,0 +1,85 @@
+/* ===================================
+   Animation Keyframes
+   =================================== */
+
+/* Basic Rotations */
+@keyframes spin {
+    to { 
+        transform: rotate(360deg); 
+    }
+}
+
+/* Fade & Scale Effects */
+@keyframes fadeIn {
+    from { 
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+    to { 
+        opacity: 1;
+        transform: translateY(-5px) scale(1);
+    }
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0; 
+        transform: translateY(-30px) scale(0.95);
+    }
+    to {
+        opacity: 1; 
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes cardEnter {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Transform & Movement Effects */
+@keyframes pulse {
+    from { 
+        transform: translate(5%, 5%) scale(1); 
+    }
+    to { 
+        transform: translate(-5%, -5%) scale(1.1); 
+    }
+}
+
+@keyframes diagonalLineMove {
+    from { 
+        background-position: 0 0; 
+    }
+    to { 
+        background-position: 200px 200px; 
+    }
+}
+
+/* ===================================
+   Accessibility & Preferences
+   =================================== */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
+    }
+    
+    /* Reset specific animations */
+    body::after,
+    header::before {
+        animation: none !important;
+    }
+    
+    .recipe-card {
+        transition: none !important;
+    }
+}

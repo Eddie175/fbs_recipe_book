@@ -1,0 +1,171 @@
+/***********************
+ * RESPONSIVE LAYOUT
+ * Breakpoint system:
+ * - Small phones: <= 320px
+ * - Regular phones/small tablets: 321px - 768px
+ * - Tablets/small laptops: 769px - 1024px
+ * - Regular laptops/desktops: 1025px - 1440px
+ * - Large screens: >= 1441px
+ ***********************/
+
+/* Small phones (portrait) */
+@media screen and (max-width: 320px) {
+    .cards-container {
+        grid-template-columns: 1fr;
+        padding: 0 10px 80px;
+    }
+
+    .recipe-card {
+        min-height: 200px;
+    }
+
+    .recipe-title {
+        font-size: 1.1rem;
+    }
+}
+
+/* Regular phones and small tablets */
+@media screen and (min-width: 321px) and (max-width: 768px) {
+    .cards-container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        padding: 0 15px 80px;
+    }
+
+    /* Container adjustments */
+    .filter-container {
+        overflow-x: auto;
+        padding-bottom: 10px;
+        margin: 0 15px;
+    }
+
+    .search-container {
+        margin: 10px 15px;
+    }
+}
+
+/* Tablets and small laptops */
+@media screen and (min-width: 769px) and (max-width: 1024px) {
+    .cards-container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        padding: 0 20px;
+    }
+
+    .recipe-card {
+        min-height: 280px;
+    }
+}
+
+/* Regular laptops and desktops */
+@media screen and (min-width: 1025px) and (max-width: 1440px) {
+    .cards-container {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 25px;
+        padding: 0 30px;
+    }
+}
+
+/* Large screens */
+@media screen and (min-width: 1441px) {
+    .cards-container {
+        grid-template-columns: repeat(3, minmax(280px, 1fr));
+        gap: 30px;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+}
+
+/***********************
+ * FEATURE QUERIES
+ * Handling special browser features and user preferences
+ ***********************/
+
+/* Dark mode preference */
+@media (prefers-color-scheme: dark) {
+    :root[data-theme="system"] {
+        --surface-color: rgba(30, 30, 40, 0.95);
+        --card-bg: #1f2937;
+        --hover-bg: #374151;
+        --text-primary: #f9fafb;
+        --text-secondary: #d1d5db;
+    }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    :root {
+        --primary: #0048a8;
+        --text-primary: #000000;
+        --text-secondary: #333333;
+    }
+
+    .recipe-card {
+        border: 2px solid #000000;
+    }
+
+    .filter-btn {
+        border: 2px solid currentColor;
+    }
+}
+
+/* Touch device optimizations */
+@media (hover: none) {
+    .recipe-card:hover {
+        transform: none;
+        box-shadow: var(--shadow-md);
+    }
+
+    .filter-btn:hover {
+        transform: none;
+    }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
+
+    .recipe-card {
+        transform: none !important;
+    }
+}
+
+/***********************
+ * SPECIAL CONTEXTS
+ ***********************/
+
+/* Print styles */
+@media print {
+    .filter-container,
+    .search-container,
+    .mobile-filter-btn,
+    .theme-toggle {
+        display: none;
+    }
+
+    .cards-container {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+
+    .recipe-card {
+        break-inside: avoid;
+        page-break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+}
+
+/* Landscape mode */
+@media screen and (max-height: 500px) and (orientation: landscape) {
+    .mobile-filter-panel {
+        max-height: 95vh;
+    }
+
+    .cards-container {
+        padding-bottom: 20px;
+    }
+}
