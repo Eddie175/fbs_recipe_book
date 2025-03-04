@@ -280,4 +280,103 @@
             font-family: "Times New Roman", Times, serif;
         }
     }
+
+    /* Print styles for recipe book */
+    *, *::before, *::after {
+        background: transparent !important;
+        color: #000 !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+        border-color: #999 !important;
+    }
+    
+    body {
+        padding: 0.5cm;
+        font-size: 12pt;
+    }
+    
+    /* Hide non-essential elements */
+    header, 
+    .search-container, 
+    .filter-container, 
+    .sort-container,
+    .mobile-filter-btn,
+    .theme-toggle,
+    .modal-close,
+    .modal-actions,
+    .modal-footer,
+    .copy-ingredients-btn,
+    .mobile-print-btn,
+    .mobile-sort-interface,
+    .mobile-filter-panel {
+        display: none !important;
+    }
+    
+    /* Recipe content styling */
+    .print-content {
+        display: block !important;
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+    
+    .print-content-inner {
+        padding: 0;
+    }
+    
+    .recipe-title {
+        font-size: 24pt;
+        margin-bottom: 0.5cm;
+        text-align: center;
+    }
+    
+    .recipe-meta {
+        font-style: italic;
+        margin-bottom: 1cm;
+        text-align: center;
+    }
+    
+    .recipe-preview {
+        font-style: italic;
+        margin-bottom: 1cm;
+        border-bottom: 1pt solid #999;
+        padding-bottom: 0.5cm;
+    }
+    
+    h2 {
+        font-size: 16pt;
+        margin-top: 0.5cm;
+        margin-bottom: 0.3cm;
+        page-break-after: avoid;
+    }
+    
+    .ingredients-list {
+        margin: 0.5cm 0;
+        padding-left: 0.5cm;
+    }
+    
+    .instructions-list {
+        margin: 0.5cm 0;
+        padding-left: 0.5cm;
+    }
+    
+    .ingredients-list li,
+    .instructions-list li {
+        margin-bottom: 0.3cm;
+        page-break-inside: avoid;
+    }
+    
+    /* Force page breaks */
+    h1, h2 {
+        page-break-after: avoid;
+    }
+    
+    .instructions-list {
+        page-break-before: auto;
+    }
+    
+    @page {
+        margin: 1.5cm 1cm;
+    }
 }

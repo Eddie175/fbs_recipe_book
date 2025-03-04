@@ -10,8 +10,12 @@ const AppState = {
     currentRecipe: null,
     sortMethod: 'default',
     isCondensedView: false,
-    isMobile: window.innerWidth <= 768
+    isMobile: window.innerWidth <= 768,
+    filteredRecipes: [] // Add this to track filtered recipes
 };
+
+// Make AppState globally available for animations.js
+window.AppState = AppState;
 
 // Utility functions
 const Utilities = {
@@ -143,6 +147,25 @@ const DOMManager = {
      */
     buildRecipeModalContent: function(recipe, modalBody) {
         modalBody.innerHTML = '';
+        // Add preview text section
+        if (recipe.preview) {
+            const previewContainer = document.createElement('div');
+            previewContainer.className = 'recipe-preview-container';
+            previewContainer.style.marginTop = '10px';
+            previewContainer.style.padding = '0 5px 10px 5px';
+            previewContainer.style.borderBottom = '1px solid rgba(0, 119, 217, 0.15)';
+            
+            const previewText = document.createElement('p');
+            previewText.className = 'recipe-preview-text';
+            previewText.textContent = recipe.preview;
+            previewText.style.fontStyle = 'italic';
+            previewText.style.color = 'var(--text-light)';
+            previewText.style.lineHeight = '1.6';
+            previewText.style.fontSize = '1.05rem';
+            
+            previewContainer.appendChild(previewText);
+            modalBody.appendChild(previewContainer);
+        }
 
         // Create ingredients title container with copy button
         const ingredientsTitleContainer = document.createElement('div');
@@ -179,12 +202,13 @@ const DOMManager = {
         tooltip.textContent = 'Copy ingredients';
         modalBody.appendChild(tooltip);
 
-        // Create ingredients list
+        // Create ingredients list with no touch event listeners on mobile
         const ingredientsList = document.createElement('ul');
         ingredientsList.className = 'ingredients-list';
         recipe.ingredients.forEach(ingredient => {
             const li = document.createElement('li');
             li.textContent = ingredient;
+            // Remove mobile touch handlers - they're causing jitter
             ingredientsList.appendChild(li);
         });
         modalBody.appendChild(ingredientsList);
@@ -195,11 +219,13 @@ const DOMManager = {
         instructionsTitle.textContent = 'Instructions';
         modalBody.appendChild(instructionsTitle);
 
+        // Create instructions list with no touch event listeners on mobile
         const instructionsList = document.createElement('ol');
         instructionsList.className = 'instructions-list';
         recipe.instructions.forEach(instruction => {
             const li = document.createElement('li');
             li.textContent = instruction;
+            // Remove mobile touch handlers - they're causing jitter
             instructionsList.appendChild(li);
         });
         modalBody.appendChild(instructionsList);
@@ -227,9 +253,17 @@ const DOMManager = {
 // UI controller
 const UI = {
     /**
+     * Expose the UI object globally for animations to use
+     */
+    exposeGlobally: function() {
+        window.UI = this;
+    },
+    
+    /**
      * Initialize the UI
      */
     init: function() {
+        this.exposeGlobally(); // Expose UI globally
         this.displayRecipes();
         this.updateCategoryCounters();
         this.setupEventListeners();
@@ -283,6 +317,9 @@ const UI = {
             return categoryMatch && searchMatch;
         });
 
+        // Store filtered recipes in app state for modal navigation
+        AppState.filteredRecipes = filteredRecipes;
+
         // Clear existing content
         container.innerHTML = '';
 
@@ -332,6 +369,7 @@ const UI = {
         const modalTitle = document.querySelector('.modal-title');
         const modalAuthor = document.querySelector('.modal-author');
         const modalBody = document.querySelector('.modal-body');
+        const modalContent = modal.querySelector('.modal-content');
 
         if (!modal || !modalTitle || !modalAuthor || !modalBody) return;
 
@@ -340,9 +378,15 @@ const UI = {
         modalAuthor.textContent = `By ${recipe.author}`;
         DOMManager.buildRecipeModalContent(recipe, modalBody);
 
+        // Preload adjacent recipes for seamless swiping
+        this.preloadAdjacentRecipes(recipe);
+        
+        // Add swipe indicators if we have multiple recipes
+        this.addSwipeIndicatorsToModal(modalContent);
+
         // Show modal with animation if available
         if (window.RecipeAnimations) {
-            window.RecipeAnimations.animateModalOpen(modal, modal.querySelector('.modal-content'));
+            window.RecipeAnimations.animateModalOpen(modal, modalContent);
         } else {
             modal.style.display = 'flex';
             modal.classList.add('show');
@@ -350,7 +394,7 @@ const UI = {
         }
 
         // Setup swipe navigation for touch devices
-        this.setupSwipeNavigation(modal.querySelector('.modal-content'));
+        this.setupSwipeNavigation(modalContent);
 
         // Focus close button for accessibility
         const closeBtn = modal.querySelector('.close');
@@ -361,14 +405,217 @@ const UI = {
     },
 
     /**
+     * Add swipe hint to the modal if multiple recipes are available
+     */
+    addSwipeIndicatorsToModal: function(modalContent) {
+        if (!modalContent) return;
+        
+        // Remove any existing indicators first
+        const existingIndicators = modalContent.querySelectorAll('.swipe-indicator, .swipe-hint');
+        existingIndicators.forEach(el => el.remove());
+        
+        // Only show hint if multiple recipes are available
+        if (AppState.filteredRecipes.length <= 1) {
+            modalContent.classList.remove('can-swipe');
+            return;
+        }
+        
+        // Add the can-swipe class to the modal content
+        modalContent.classList.add('can-swipe');
+        
+        // Only show the swipe hint on mobile devices
+        if (AppState.isMobile) {
+            // Create swipe hint message
+            const swipeHint = document.createElement('div');
+            swipeHint.className = 'swipe-hint';
+            swipeHint.textContent = `Swipe to browse ${AppState.filteredRecipes.length} recipes`;
+            
+            // Add hint to modal
+            modalContent.appendChild(swipeHint);
+            
+            // Show hint every time now
+            setTimeout(() => {
+                swipeHint.classList.add('show');
+                
+                // Auto-hide after a delay
+                setTimeout(() => {
+                    swipeHint.classList.remove('show');
+                }, 3000); // Increased from 2000 to give more time to read
+            }, 500);
+        }
+    },
+
+    /**
+     * Preload adjacent recipes for faster swiping
+     */
+    preloadAdjacentRecipes: function(currentRecipe) {
+        if (!currentRecipe) return;
+        
+        // Use filtered recipes array
+        const filteredRecipes = AppState.filteredRecipes;
+        
+        if (filteredRecipes.length <= 1) {
+            if (window.RecipePreload) {
+                window.RecipePreload.prevIndex = null;
+                window.RecipePreload.nextIndex = null;
+                window.RecipePreload.isReady = false;
+            }
+            return;
+        }
+        
+        const currentIndex = filteredRecipes.findIndex(r => 
+            r.title === currentRecipe.title && 
+            r.author === currentRecipe.author
+        );
+        
+        if (currentIndex === -1) return;
+        
+        // Calculate adjacent indices with wrap-around
+        const prevIndex = (currentIndex - 1 + filteredRecipes.length) % filteredRecipes.length;
+        const nextIndex = (currentIndex + 1) % filteredRecipes.length;
+        
+        // Initialize preload structures if they don't exist
+        if (!window.RecipePreload) {
+            window.RecipePreload = {
+                prev: document.createElement('div'),
+                next: document.createElement('div'),
+                scrollPositions: {}, // Store scroll positions by recipe title
+                isReady: false
+            };
+            
+            window.RecipePreload.prev.className = 'preload-container prev';
+            window.RecipePreload.next.className = 'preload-container next';
+            window.RecipePreload.prev.style.display = 'none';
+            window.RecipePreload.next.style.display = 'none';
+            
+            document.body.appendChild(window.RecipePreload.prev);
+            document.body.appendChild(window.RecipePreload.next);
+        }
+        
+        // Preload in the background but don't block the UI
+        setTimeout(() => {
+            // Preload content for both directions
+            DOMManager.buildRecipeModalContent(filteredRecipes[prevIndex], window.RecipePreload.prev);
+            DOMManager.buildRecipeModalContent(filteredRecipes[nextIndex], window.RecipePreload.next);
+            
+            // Store indices and recipes for fast access
+            window.RecipePreload.prevIndex = prevIndex;
+            window.RecipePreload.nextIndex = nextIndex;
+            window.RecipePreload.prevRecipe = filteredRecipes[prevIndex];
+            window.RecipePreload.nextRecipe = filteredRecipes[nextIndex];
+            window.RecipePreload.isReady = true;
+            
+            // Pre-create HTML content for even faster swapping
+            window.RecipePreload.prevHTML = window.RecipePreload.prev.innerHTML;
+            window.RecipePreload.nextHTML = window.RecipePreload.next.innerHTML;
+        }, 10);
+    },
+
+    /**
+     * Navigate between recipes in the modal with optimized performance
+     */
+    navigateRecipes: function(direction) {
+        if (!AppState.currentRecipe) return;
+        
+        const filteredRecipes = AppState.filteredRecipes;
+        
+        if (filteredRecipes.length <= 1) return;
+        
+        // Store current scroll position before navigation
+        const modalBody = document.querySelector('.modal-body');
+        if (modalBody && AppState.currentRecipe) {
+            const currentKey = AppState.currentRecipe.title + '-' + AppState.currentRecipe.author;
+            if (!window.RecipePreload) window.RecipePreload = { scrollPositions: {} };
+            if (!window.RecipePreload.scrollPositions) window.RecipePreload.scrollPositions = {};
+            window.RecipePreload.scrollPositions[currentKey] = modalBody.scrollTop;
+        }
+        
+        let targetIndex;
+        let targetRecipe;
+        
+        // Use preloaded content when available
+        if (window.RecipePreload && window.RecipePreload.isReady) {
+            if (direction === 'next') {
+                targetIndex = window.RecipePreload.nextIndex;
+                targetRecipe = window.RecipePreload.nextRecipe;
+            } else {
+                targetIndex = window.RecipePreload.prevIndex;
+                targetRecipe = window.RecipePreload.prevRecipe;
+            }
+        } else {
+            // Fallback to regular index calculation
+            const currentIndex = filteredRecipes.findIndex(r => 
+                r.title === AppState.currentRecipe.title && 
+                r.author === AppState.currentRecipe.author
+            );
+            
+            if (currentIndex === -1) return;
+            
+            targetIndex = direction === 'next' 
+                ? (currentIndex + 1) % filteredRecipes.length 
+                : (currentIndex - 1 + filteredRecipes.length) % filteredRecipes.length;
+                
+            targetRecipe = filteredRecipes[targetIndex];
+        }
+
+        const modal = document.getElementById('recipeModal');
+        const modalContent = modal.querySelector('.modal-content');
+        const modalTitle = document.querySelector('.modal-title');
+        const modalAuthor = document.querySelector('.modal-author');
+        
+        // Apply instantaneous transition using preloaded content
+        if (window.RecipePreload && window.RecipePreload.isReady) {
+            // Update modal header immediately
+            modalTitle.textContent = targetRecipe.title;
+            modalAuthor.textContent = `By ${targetRecipe.author}`;
+            
+            // Direct content swap without animation for better performance
+            if (direction === 'next' && window.RecipePreload.nextHTML) {
+                modalBody.innerHTML = window.RecipePreload.nextHTML;
+            } else if (direction === 'prev' && window.RecipePreload.prevHTML) {
+                modalBody.innerHTML = window.RecipePreload.prevHTML;
+            } else {
+                // Fallback if preloaded HTML isn't available
+                DOMManager.buildRecipeModalContent(targetRecipe, modalBody);
+            }
+            
+            // Update app state
+            AppState.currentRecipe = targetRecipe;
+            
+            // Restore scroll position if we've visited this recipe before
+            const targetKey = targetRecipe.title + '-' + targetRecipe.author;
+            if (window.RecipePreload.scrollPositions && 
+                window.RecipePreload.scrollPositions[targetKey] !== undefined) {
+                modalBody.scrollTop = window.RecipePreload.scrollPositions[targetKey];
+            } else {
+                modalBody.scrollTop = 0; // Start at top for new recipes
+            }
+            
+            // Start preloading the next recipes immediately
+            this.preloadAdjacentRecipes(targetRecipe);
+            
+            // Update swipe indicators
+            this.addSwipeIndicatorsToModal(modalContent);
+            
+            // Set up swipe navigation again
+            this.setupSwipeNavigation(modalContent);
+            
+        } else {
+            // Fallback to old navigation method
+            this.openRecipeModal(targetRecipe);
+        }
+    },
+
+    /**
      * Close the recipe modal
      */
     closeModal: function() {
         const modal = document.getElementById('recipeModal');
         if (!modal) return;
 
-        // Reset swipe hint state for next modal open
-        localStorage.removeItem('swipeHintShown');
+        // Keep hint shown state for the session
+        // We don't reset the swipeHintShown flag here anymore
+        // This ensures the hint appears only once per browsing session
 
         if (window.RecipeAnimations) {
             window.RecipeAnimations.animateModalClose(modal, modal.querySelector('.modal-content'));
@@ -380,37 +627,6 @@ const UI = {
                 modal.style.display = 'none';
                 modal.classList.remove('hide');
             }, 300);
-        }
-    },
-
-    /**
-     * Navigate between recipes in the modal
-     */
-    navigateRecipes: function(direction) {
-        if (!AppState.currentRecipe) return;
-
-        const currentIndex = recipes.findIndex(r => 
-            r.title === AppState.currentRecipe.title && 
-            r.author === AppState.currentRecipe.author
-        );
-        
-        if (currentIndex === -1) return;
-
-        // Calculate new index with wrap-around
-        const newIndex = direction === 'next' 
-            ? (currentIndex + 1) % recipes.length 
-            : (currentIndex - 1 + recipes.length) % recipes.length;
-
-        const modal = document.getElementById('recipeModal');
-        const content = modal.querySelector('.modal-content');
-
-        // Animate transition
-        if (direction === 'next') {
-            window.RecipeAnimations.onNextRecipe = () => this.openRecipeModal(recipes[newIndex]);
-            window.RecipeAnimations.animateNextRecipe(modal, content);
-        } else {
-            window.RecipeAnimations.onPrevRecipe = () => this.openRecipeModal(recipes[newIndex]);
-            window.RecipeAnimations.animatePrevRecipe(modal, content);
         }
     },
 
@@ -604,54 +820,180 @@ const UI = {
     },
 
     /**
-     * Set up touch swipe navigation for mobile
+     * Set up touch swipe navigation for mobile with improved detection
      */
     setupSwipeNavigation: function(element) {
         if (!element) return;
 
+        // First, remove any existing touch handlers to avoid duplication
+        const oldHandlers = element._swipeHandlers;
+        if (oldHandlers) {
+            element.removeEventListener('touchstart', oldHandlers.start);
+            element.removeEventListener('touchmove', oldHandlers.move);
+            element.removeEventListener('touchend', oldHandlers.end);
+        }
+
         let touchStartX = 0;
-        let touchEndX = 0;
-        const leftIndicator = document.querySelector('.touch-indicator-left');
-        const rightIndicator = document.querySelector('.touch-indicator-right');
-
-        // Capture touch start position
-        element.addEventListener('touchstart', function(e) {
-            touchStartX = e.changedTouches[0].screenX;
-        }, { passive: true });
-
-        // Show directional indicator during swipe
-        element.addEventListener('touchmove', function(e) {
-            const currentX = e.changedTouches[0].screenX;
-            const diff = currentX - touchStartX;
-
-            if (diff > 50 && leftIndicator) {
-                leftIndicator.classList.add('show');
-                if (rightIndicator) rightIndicator.classList.remove('show');
-            } else if (diff < -50 && rightIndicator) {
-                rightIndicator.classList.add('show');
-                if (leftIndicator) leftIndicator.classList.remove('show');
-            } else {
-                if (leftIndicator) leftIndicator.classList.remove('show');
-                if (rightIndicator) rightIndicator.classList.remove('show');
+        let touchStartY = 0;
+        let touchCurrentX = 0;
+        let touchCurrentY = 0;
+        let swipeInitiated = false;
+        let isSwipeGesture = false; // Track if this is an actual swipe, not just a tap
+        const modalBody = element.querySelector('.modal-body');
+        let currentXTransform = 0;
+        let isScrolling = false;
+        let swipeIgnored = false;
+        const threshold = 80; 
+        const minSwipeDistance = 50; // Increased to better distinguish from taps
+        const resistanceFactor = 0.4;
+        let touchStartTime = 0;
+        let initialScrollTop = 0;
+        
+        function handleTouchStart(e) {
+            // Don't initiate swipe on interactive elements
+            const target = e.target;
+            
+            // Check for interactive elements more thoroughly
+            if (target.closest('button') || 
+                target.closest('a') || 
+                target.closest('.copy-ingredients-btn') || 
+                target.closest('.mobile-print-btn') ||
+                target.closest('.print-btn') ||
+                target.tagName === 'BUTTON' || 
+                target.tagName === 'A' ||
+                target.tagName === 'INPUT' ||
+                target.getAttribute('role') === 'button') {
+                swipeIgnored = true;
+                return;
             }
-        }, { passive: true });
-
-        // Handle swipe completion
-        element.addEventListener('touchend', function(e) {
-            touchEndX = e.changedTouches[0].screenX;
-
-            // Hide indicators
-            if (leftIndicator) leftIndicator.classList.remove('show');
-            if (rightIndicator) rightIndicator.classList.remove('show');
-
-            // Calculate swipe distance and direction
-            const diff = touchEndX - touchStartX;
-
-            // Navigate if swipe distance exceeds threshold
-            if (Math.abs(diff) > 100) {
-                UI.navigateRecipes(diff > 0 ? 'prev' : 'next');
+            
+            // Reset state for new touch
+            swipeIgnored = false;
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+            currentXTransform = 0;
+            swipeInitiated = true;
+            isSwipeGesture = false; // Start by assuming it's a tap, not a swipe
+            isScrolling = false;
+            touchStartTime = Date.now();
+            
+            // Remember scroll position
+            if (modalBody) {
+                initialScrollTop = modalBody.scrollTop;
             }
-        }, { passive: true });
+            
+            // Use hardware acceleration for smoother animations
+            element.style.willChange = 'transform';
+        }
+        
+        function handleTouchMove(e) {
+            if (!swipeInitiated || swipeIgnored) return;
+            
+            touchCurrentX = e.touches[0].clientX;
+            touchCurrentY = e.touches[0].clientY;
+            
+            const diffX = touchCurrentX - touchStartX;
+            const diffY = touchCurrentY - touchStartY;
+            
+            // If horizontal movement is significant, consider it a swipe gesture
+            if (Math.abs(diffX) > minSwipeDistance) {
+                isSwipeGesture = true;
+            }
+            
+            // Check for vertical scrolling intent with improved detection
+            if (modalBody && modalBody.contains(e.target)) {
+                // Consider it scrolling if:
+                // 1. Vertical movement is significantly greater than horizontal
+                // 2. OR if we've moved vertically in the scrollable area
+                const verticalDominant = Math.abs(diffY) > Math.abs(diffX) * 1.2; // Increased ratio
+                const hasScrolled = modalBody.scrollTop !== initialScrollTop;
+                
+                if (verticalDominant || hasScrolled) {
+                    isScrolling = true;
+                    
+                    // Reset any transform we might have started
+                    if (element.style.transform) {
+                        element.style.transform = '';
+                        element.style.transition = 'transform 0.2s ease';
+                        setTimeout(() => {
+                            element.style.transition = '';
+                        }, 200);
+                    }
+                    
+                    return; // Allow default scroll behavior
+                }
+            }
+            
+            // If we've determined this is a scroll, don't interfere
+            if (isScrolling) return;
+            
+            // For clear horizontal swipes, prevent default to avoid page scrolling
+            if (Math.abs(diffX) > minSwipeDistance && Math.abs(diffX) > Math.abs(diffY) * 1.5) {
+                e.preventDefault();
+                
+                // Apply resistance for natural feel
+                const restrictedDiffX = diffX * resistanceFactor;
+                currentXTransform = restrictedDiffX;
+                
+                // Apply transform for direct manipulation feel
+                element.style.transform = `translateX(${restrictedDiffX}px)`;
+                element.style.transition = '';
+            }
+        }
+        
+        function handleTouchEnd(e) {
+            // Skip processing if touch was ignored or already scrolling
+            if (swipeIgnored || isScrolling) {
+                // Reset transformations
+                element.style.transform = '';
+                element.style.willChange = 'auto';
+                return;
+            }
+            
+            // Calculate swipe velocity for more natural feel
+            const touchEndTime = Date.now();
+            const swipeTime = touchEndTime - touchStartTime;
+            const diffX = touchCurrentX - touchStartX;
+            const swipeVelocity = Math.abs(diffX) / swipeTime;
+            const isQuickSwipe = swipeVelocity > 0.5 && Math.abs(diffX) > 30;
+            
+            // Only navigate if it was an actual swipe gesture (not just a tap)
+            // We use both the isSwipeGesture flag and check threshold/velocity
+            if (swipeInitiated && isSwipeGesture && (Math.abs(currentXTransform) > threshold || isQuickSwipe)) {
+                const direction = currentXTransform > 0 ? 'prev' : 'next';
+                
+                // Navigate to next/previous recipe
+                UI.navigateRecipes(direction);
+                
+                // Reset transform immediately
+                element.style.transform = '';
+                
+            } else if (swipeInitiated && (Math.abs(currentXTransform) > 0)) {
+                // Not enough movement, spring back to center
+                element.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                element.style.transform = '';
+                
+                setTimeout(() => {
+                    element.style.transition = '';
+                    element.style.willChange = 'auto';
+                }, 300);
+            }
+            
+            // Reset state
+            swipeInitiated = false;
+        }
+
+        // Store handlers for future cleanup
+        element._swipeHandlers = {
+            start: handleTouchStart,
+            move: handleTouchMove,
+            end: handleTouchEnd
+        };
+        
+        // Attach event listeners with appropriate passive settings
+        element.addEventListener('touchstart', handleTouchStart, { passive: true });
+        element.addEventListener('touchmove', handleTouchMove, { passive: false });
+        element.addEventListener('touchend', handleTouchEnd, { passive: true });
     },
 
     /**
