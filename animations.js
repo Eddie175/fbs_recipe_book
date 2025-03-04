@@ -115,63 +115,8 @@ function animateModalOpen(modal, content) {
             borderRadius: '12px' // Keep border radius
         });
 
-        // Show swipe hint only on mobile/tablet
-        if (!localStorage.getItem('modalHintShown')) {
-            const hint = document.createElement('div');
-            hint.className = 'modal-swipe-hint';
-            hint.innerHTML = `
-                <div class="hint-content" style="
-                    display: flex;
-                    align-items: center;
-                    gap: 12px;
-                    background: ${document.documentElement.getAttribute('data-theme') === 'dark' 
-                        ? 'rgba(0, 0, 0, 0.65)' 
-                        : 'rgba(0, 0, 0, 0.75)'};
-                    backdrop-filter: blur(8px);
-                    color: white;
-                    padding: 8px 16px;
-                    border-radius: 20px;
-                    font-size: 14px;
-                    white-space: nowrap;
-                    box-shadow: ${document.documentElement.getAttribute('data-theme') === 'dark'
-                        ? '0 0 0 2px rgb(49, 130, 206), 0 0 20px rgba(49, 130, 206, 0.6), 0 0 40px rgba(49, 130, 206, 0.4)'
-                        : '0 2px 8px rgba(0, 0, 0, 0.25)'};
-                    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);">
-                    <span class="arrow" style="font-size: 18px; opacity: 0.95;">←</span>
-                    <span class="hint-text" style="font-weight: 500; letter-spacing: 0.02em;">Swipe between recipes</span>
-                    <span class="arrow" style="font-size: 18px; opacity: 0.95;">→</span>
-                </div>
-            `;
-            
-            modal.querySelector('.modal-content').appendChild(hint);
-            
-            gsap.set(hint, { 
-                opacity: 0,
-                position: 'absolute',
-                bottom: '10%',  // Changed from 33% to 25%
-                left: '50%',
-                xPercent: -50,
-                width: 'auto',
-                whiteSpace: 'nowrap',
-                zIndex: 1000
-            });
-
-            gsap.timeline()
-                .to(hint, {
-                    opacity: 1,
-                    duration: 0.5,
-                    ease: 'power1.inOut'
-                })
-                .to(hint, {
-                    opacity: 0,
-                    duration: 0.5,
-                    delay: 2.5,
-                    ease: 'power1.inOut',
-                    onComplete: () => hint.remove()
-                });
-            
-            localStorage.setItem('modalHintShown', 'true');
-        }
+        // Remove swipe hint - we now use the UI.addSwipeIndicatorsToModal instead
+        // This removes the duplicate "Swipe between recipes" hint
     } else {
         gsap.set(modal, { 
             display: 'flex',
