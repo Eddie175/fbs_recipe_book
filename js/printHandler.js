@@ -569,210 +569,130 @@ const PrintHandler = {
      * iOS Chrome requires different handling due to its unique print dialog behavior
      */
     printWithIOSChromeApproach: function(recipe) {
-        // Save original page content
-        const originalContent = document.body.innerHTML;
-        const originalBodyStyle = document.body.getAttribute('style') || '';
-        const originalScrollPos = window.scrollY;
+        // Create a new window for printing
+        const printWindow = window.open('', '_blank');
         
-        try {
-            // Prepare print-friendly content
-            const printContent = `
-                <div id="ios-chrome-print-view" style="
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    background: white;
-                    color: black;
-                    padding: 20px;
-                    box-sizing: border-box;
-                    font-family: -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-                    z-index: 999999;
-                    min-height: 100%;
-                ">
-                    <div style="position: fixed; top: 10px; right: 10px; z-index: 9999999;">
-                        <button id="ios-print-close" style="
-                            background: #ff4444;
-                            color: white;
-                            border: none;
-                            padding: 8px 16px;
-                            border-radius: 20px;
-                            font-weight: bold;
-                            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-                        ">Close</button>
-                    </div>
-                    
-                    <div style="
-                        position: fixed; 
-                        bottom: 20px; 
-                        left: 50%; 
-                        transform: translateX(-50%);
-                        background: rgba(0,0,0,0.8);
-                        color: white;
-                        padding: 12px 20px;
-                        border-radius: 25px;
-                        font-size: 14px;
-                        max-width: 80%;
-                        text-align: center;
-                        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-                        z-index: 9999999;
-                    ">
-                        Tap <b>Share</b> icon → <b>Print</b>
-                    </div>
-                    
-                    <div style="margin-top: 60px;">
-                        <h1 style="
-                            font-size: 24px;
-                            margin-bottom: 10px;
-                            color: #0077d9;
-                        ">${recipe.title}</h1>
-                        
-                        <p style="
-                            font-style: italic;
-                            margin-bottom: 15px;
-                            font-size: 16px;
-                            color: #666;
-                        ">By ${recipe.author}</p>
-                        
-                        <div style="
-                            display: inline-block;
-                            background: #f0f8ff; 
-                            color: #0077d9;
-                            padding: 5px 12px;
-                            border-radius: 15px;
-                            font-size: 14px;
-                            margin-bottom: 20px;
-                            border: 1px solid #0077d9;
-                        ">${this.getCategoryName(recipe.category)}</div>
-                        
-                        ${recipe.preview ? `
-                            <div style="
-                                font-style: italic;
-                                margin: 20px 0;
-                                padding: 15px;
-                                background: #f9f9f9;
-                                border-left: 4px solid #0077d9;
-                                color: #666;
-                            ">${recipe.preview}</div>
-                        ` : ''}
-                        
-                        <h2 style="
-                            color: #0077d9;
-                            font-size: 20px;
-                            margin-top: 30px;
-                            border-bottom: 2px solid #0077d9;
-                            padding-bottom: 8px;
-                        ">Ingredients</h2>
-                        
-                        <ul style="
-                            padding-left: 20px;
-                            margin-bottom: 30px;
-                        ">
-                            ${recipe.ingredients.map(ingredient => 
-                                `<li style="margin-bottom: 8px;">${ingredient}</li>`
-                            ).join('')}
-                        </ul>
-                        
-                        <h2 style="
-                            color: #0077d9;
-                            font-size: 20px;
-                            margin-top: 30px;
-                            border-bottom: 2px solid #0077d9;
-                            padding-bottom: 8px;
-                        ">Instructions</h2>
-                        
-                        <ol style="
-                            padding-left: 20px;
-                            margin-bottom: 30px;
-                        ">
-                            ${recipe.instructions.map((instruction, index) => 
-                                `<li style="margin-bottom: 12px;">${instruction}</li>`
-                            ).join('')}
-                        </ol>
-                        
-                        <div style="
-                            text-align: center;
-                            margin-top: 40px;
-                            padding-top: 20px;
-                            border-top: 1px solid #ddd;
-                            color: #999;
-                            font-size: 14px;
-                        ">Printed from FBS Employee Recipe Book</div>
-                    </div>
-                </div>
-            `;
-            
-            // Replace page content
-            document.body.style.overflow = 'hidden';
-            document.body.style.position = 'relative';
-            document.body.innerHTML = printContent;
-            
-            // Set up close button functionality
-            document.getElementById('ios-print-close').addEventListener('click', () => {
-                // Restore original content
-                document.body.innerHTML = originalContent;
-                document.body.setAttribute('style', originalBodyStyle);
-                window.scrollTo(0, originalScrollPos);
-                
-                // Reinitialize the app if needed
-                if (typeof UI !== 'undefined' && UI.init) {
-                    UI.init();
-                }
-                
-                this.isPrintingInProgress = false;
-            });
-            
-            // Add custom print stylesheet optimized for iOS Chrome
-            const printStyle = document.createElement('style');
-            printStyle.id = 'ios-chrome-print-style';
-            printStyle.textContent = `
-                @media print {
-                    #ios-print-close, 
-                    div[style*="position: fixed"] {
-                        display: none !important;
-                    }
-                    
-                    body {
-                        padding: 0 !important;
-                        margin: 0 !important;
-                    }
-                    
-                    #ios-chrome-print-view {
-                        position: static !important;
-                        padding: 0.5in !important;
-                    }
-                    
-                    h1, h2 {
-                        page-break-after: avoid;
-                    }
-                    
-                    ul, ol {
-                        page-break-before: avoid;
-                    }
-                    
-                    li {
-                        page-break-inside: avoid;
-                    }
-                }
-            `;
-            document.head.appendChild(printStyle);
-            
-        } catch (error) {
-            console.error('iOS Chrome print error:', error);
-            
-            // Restore original content
-            document.body.innerHTML = originalContent;
-            document.body.setAttribute('style', originalBodyStyle);
-            window.scrollTo(0, originalScrollPos);
-            
-            // Display error toast
-            this.showErrorToast('Printing failed. Please try again.');
-            
-            // Reset print state
-            this.isPrintingInProgress = false;
+        if (!printWindow) {
+            // If popup blocked, fall back to direct approach
+            console.log('Popup blocked, using fallback approach');
+            this.printWithDirectApproach(recipe);
+            return;
         }
+        
+        // Store category name to avoid 'this' context issues in template literal
+        const categoryName = this.getCategoryName(recipe.category);
+        
+        // Ultra simple black text on white background
+        const ultraSimpleContent = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>${recipe.title} - Print</title>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        margin: 16px;
+                        color: black;
+                        background: white;
+                        line-height: 1.4;
+                    }
+                    h1, h2 {
+                        margin-top: 20px;
+                        margin-bottom: 10px;
+                    }
+                    ul, ol {
+                        padding-left: 25px;
+                        margin-bottom: 20px;
+                    }
+                    li {
+                        margin-bottom: 8px;
+                    }
+                    .info {
+                        margin-bottom: 16px;
+                    }
+                    .print-message {
+                        position: fixed;
+                        bottom: 20px;
+                        left: 0;
+                        right: 0;
+                        text-align: center;
+                        background: #f0f0f0;
+                        padding: 10px;
+                        border-top: 1px solid #ccc;
+                    }
+                    .close-button {
+                        position: fixed;
+                        top: 10px;
+                        right: 10px;
+                        padding: 5px 10px;
+                        background: #f0f0f0;
+                        border: 1px solid #ccc;
+                        border-radius: 4px;
+                    }
+                    @media print {
+                        .print-message, .close-button {
+                            display: none;
+                        }
+                    }
+                </style>
+            </head>
+            <body>
+                <button class="close-button" onclick="window.close()">Close</button>
+                
+                <div class="print-message">
+                    Use the Share icon → Print option to print this recipe
+                </div>
+                
+                <h1>${recipe.title}</h1>
+                
+                <div class="info">
+                    By: ${recipe.author}<br>
+                    Category: ${categoryName}
+                </div>
+                
+                ${recipe.preview ? '<p>' + recipe.preview + '</p>' : ''}
+                
+                <h2>Ingredients</h2>
+                <ul>
+                    ${recipe.ingredients.map(function(ingredient) { 
+                        return '<li>' + ingredient + '</li>';
+                    }).join('')}
+                </ul>
+                
+                <h2>Instructions</h2>
+                <ol>
+                    ${recipe.instructions.map(function(instruction) {
+                        return '<li>' + instruction + '</li>';
+                    }).join('')}
+                </ol>
+                
+                <script>
+                    // Auto-close the window if user comes back to this tab without printing
+                    window.addEventListener('blur', function() {
+                        setTimeout(function() {
+                            if (document.hidden) {
+                                window.close();
+                            }
+                        }, 5000);
+                    });
+                </script>
+            </body>
+            </html>
+        `;
+        
+        // Write the content to the new window
+        printWindow.document.open();
+        printWindow.document.write(ultraSimpleContent);
+        printWindow.document.close();
+        
+        // Reset the printing flag after a timeout
+        setTimeout(() => {
+            this.isPrintingInProgress = false;
+        }, 5000);
     },
-    
+
     /**
      * Show error toast message
      */
