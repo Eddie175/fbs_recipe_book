@@ -146,7 +146,11 @@ const DOMManager = {
      * Build modal content for a recipe
      */
     buildRecipeModalContent: function(recipe, modalBody) {
+        if (!recipe || !modalBody) return;
+        
+        // Clear the modal body first
         modalBody.innerHTML = '';
+        
         // Add preview text section
         if (recipe.preview) {
             const previewContainer = document.createElement('div');
@@ -167,33 +171,89 @@ const DOMManager = {
             modalBody.appendChild(previewContainer);
         }
 
-        // Create ingredients title container with copy button
+        // CRITICAL: Create ingredients title container with proper structure
         const ingredientsTitleContainer = document.createElement('div');
         ingredientsTitleContainer.className = 'ingredients-title-container';
+        ingredientsTitleContainer.setAttribute('data-section', 'ingredients-header');
 
+        // Create the title element
         const ingredientsTitle = document.createElement('h3');
         ingredientsTitle.className = 'ingredients-title';
         ingredientsTitle.textContent = 'Ingredients';
+        ingredientsTitle.setAttribute('data-section', 'ingredients-title');
 
+        // Create button container
+        const buttonContainer = document.createElement('div');
+        buttonContainer.className = 'modal-action-buttons';
+        buttonContainer.setAttribute('data-purpose', 'ingredient-actions');
+
+        // Create copy button with a more reliable structure
         const copyBtn = document.createElement('button');
         copyBtn.className = 'copy-ingredients-btn';
         copyBtn.setAttribute('aria-label', 'Copy ingredients to clipboard');
         copyBtn.setAttribute('title', 'Copy ingredients');
+        copyBtn.setAttribute('type', 'button');
         copyBtn.textContent = 'Copy';
 
+        // Create print button with improved isolation
         const printBtn = document.createElement('button');
         printBtn.className = 'mobile-print-btn';
         printBtn.setAttribute('aria-label', 'Print recipe');
+        printBtn.setAttribute('type', 'button');
         printBtn.textContent = '🖨️';
-        printBtn.onclick = () => PrintHandler.printRecipe(AppState.currentRecipe);
+        
+        // Use an isolated debounced print handler that doesn't interfere with DOM
+        let printClickInProgress = false;
+        const debouncedPrint = function(e) {
+            // Prevent any default behaviors and stop propagation
+            e.preventDefault(); 
+            e.stopPropagation();
+            
+            // Prevent double-triggering
+            if (printClickInProgress) return;
+            printClickInProgress = true;
+            
+            // Visual feedback
+            this.style.opacity = '0.7';
+            
+            // Use a direct reference to the current recipe to avoid DOM manipulation
+            const recipeToPrint = Object.assign({}, AppState.currentRecipe);
+            
+            // Trigger print with slight delay for visual feedback
+            setTimeout(() => {
+                // Use the isolated print method that doesn't affect DOM
+                PrintHandler.printRecipe(recipeToPrint);
+                
+                // Reset visual state
+                this.style.opacity = '1';
+                
+                // Reset click state after a reasonable delay
+                setTimeout(() => {
+                    printClickInProgress = false;
+                }, 1000);
+            }, 50);
+        };
 
-        const buttonContainer = document.createElement('div');
-        buttonContainer.className = 'modal-action-buttons';
+        // Add event listeners with proper isolation
+        printBtn.addEventListener('click', debouncedPrint);
+        
+        // Add special handling for touch events
+        printBtn.addEventListener('touchstart', function(e) {
+            // Just provide feedback
+            printBtn.style.opacity = '0.7';
+        });
+        
+        printBtn.addEventListener('touchend', debouncedPrint);
+
+        // Assemble button container
         buttonContainer.appendChild(copyBtn);
         buttonContainer.appendChild(printBtn);
 
+        // Assemble ingredients header
         ingredientsTitleContainer.appendChild(ingredientsTitle);
         ingredientsTitleContainer.appendChild(buttonContainer);
+        
+        // Add to modal
         modalBody.appendChild(ingredientsTitleContainer);
 
         // Add tooltip for copy function
@@ -202,50 +262,67 @@ const DOMManager = {
         tooltip.textContent = 'Copy ingredients';
         modalBody.appendChild(tooltip);
 
-        // Create ingredients list with no touch event listeners on mobile
+        // Create ingredients list
         const ingredientsList = document.createElement('ul');
         ingredientsList.className = 'ingredients-list';
+        ingredientsList.setAttribute('data-section', 'ingredients-list');
+        
+        // Add each ingredient as a list item
         recipe.ingredients.forEach(ingredient => {
             const li = document.createElement('li');
             li.textContent = ingredient;
-            // Remove mobile touch handlers - they're causing jitter
             ingredientsList.appendChild(li);
         });
+        
+        // Add ingredients list to modal
         modalBody.appendChild(ingredientsList);
 
         // Create instructions section
         const instructionsTitle = document.createElement('h3');
         instructionsTitle.className = 'instructions-title';
         instructionsTitle.textContent = 'Instructions';
+        instructionsTitle.setAttribute('data-section', 'instructions-title');
         modalBody.appendChild(instructionsTitle);
 
-        // Create instructions list with no touch event listeners on mobile
+        // Create instructions list
         const instructionsList = document.createElement('ol');
         instructionsList.className = 'instructions-list';
+        instructionsList.setAttribute('data-section', 'instructions-list');
+        
+        // Add each instruction as a list item
         recipe.instructions.forEach(instruction => {
             const li = document.createElement('li');
             li.textContent = instruction;
-            // Remove mobile touch handlers - they're causing jitter
             instructionsList.appendChild(li);
         });
+        
+        // Add instructions list to modal
         modalBody.appendChild(instructionsList);
 
-        // Set up copy ingredients functionality
+        // Set up copy ingredients functionality - with improved error handling
         copyBtn.addEventListener('click', () => {
-            const ingredientsText = recipe.ingredients.join('\n');
-            navigator.clipboard.writeText(ingredientsText).then(() => {
-                tooltip.classList.add('show');
-                tooltip.textContent = 'Copied!';
-                setTimeout(() => {
-                    tooltip.classList.remove('show');
-                    setTimeout(() => tooltip.textContent = 'Copy ingredients', 300);
-                }, 1500);
-            }).catch(err => {
-                console.error('Failed to copy: ', err);
-                tooltip.classList.add('show');
-                tooltip.textContent = 'Copy failed!';
-                setTimeout(() => tooltip.classList.remove('show'), 1500);
-            });
+            try {
+                const ingredientsText = recipe.ingredients.join('\n');
+                navigator.clipboard.writeText(ingredientsText)
+                    .then(() => {
+                        // Show success feedback
+                        tooltip.classList.add('show');
+                        tooltip.textContent = 'Copied!';
+                        setTimeout(() => {
+                            tooltip.classList.remove('show');
+                            setTimeout(() => tooltip.textContent = 'Copy ingredients', 300);
+                        }, 1500);
+                    })
+                    .catch(err => {
+                        // Show error feedback
+                        console.error('Failed to copy: ', err);
+                        tooltip.classList.add('show');
+                        tooltip.textContent = 'Copy failed!';
+                        setTimeout(() => tooltip.classList.remove('show'), 1500);
+                    });
+            } catch (e) {
+                console.error('Copy operation error:', e);
+            }
         });
     }
 };
@@ -264,12 +341,16 @@ const UI = {
      */
     init: function() {
         this.exposeGlobally(); // Expose UI globally
+        
+        // Setup compact view first to ensure it's ready before displaying recipes
+        this.setupCondensedView();
+        
+        // Then continue with other initialization
         this.displayRecipes();
         this.updateCategoryCounters();
         this.setupEventListeners();
         this.createMobileFilterButton();
         this.setupMobileFilters();
-        this.setupCondensedView();
         this.checkMobileView();
 
         // Set up navigation buttons
@@ -277,6 +358,9 @@ const UI = {
         const prevBtn = document.querySelector('.prev-btn');
         if (nextBtn) nextBtn.addEventListener('click', () => this.navigateRecipes('next'));
         if (prevBtn) prevBtn.addEventListener('click', () => this.navigateRecipes('prev'));
+        
+        // Log initialization complete
+        console.log('UI initialization complete');
     },
 
     /**
@@ -426,6 +510,9 @@ const UI = {
 
         // Setup modal scroll indication
         this.setupModalScroll();
+        
+        // Setup navigation buttons for desktop
+        this.setupDesktopNavButtons(recipe);
 
         // Set accessibility attributes
         modal.setAttribute('aria-hidden', 'false');
@@ -798,91 +885,143 @@ const UI = {
      */
     setupMobileFilters: function() {
         const mobileFilterPanel = document.getElementById('mobileFilterPanel');
-        const panelCloseBtn = document.querySelector('.panel-close-btn');
-
-        if (mobileFilterPanel) {
-            // Setup close button
-            if (panelCloseBtn) {
-                panelCloseBtn.addEventListener('click', function() {
-                    mobileFilterPanel.classList.remove('show');
-                });
+        const mobileFilterBtn = document.getElementById('mobileFilterBtn');
+        
+        // Make sure we have the panel first
+        if (!mobileFilterPanel) return;
+        
+        // Find the close button directly inside the panel for reliability
+        const panelCloseBtn = mobileFilterPanel.querySelector('.panel-close-btn');
+        
+        // Clean up any existing handlers to prevent duplication
+        if (this._mobileFilterCloseHandler) {
+            document.removeEventListener('click', this._mobileFilterCloseHandler);
+        }
+        
+        // 1. Set up the close button with a direct, simple handler
+        if (panelCloseBtn) {
+            // Remove any existing listeners by cloning and replacing
+            const oldBtn = panelCloseBtn;
+            const newBtn = document.createElement('button');
+            newBtn.className = oldBtn.className;
+            newBtn.innerHTML = oldBtn.innerHTML;
+            newBtn.setAttribute('aria-label', 'Close filter panel');
+            
+            // Replace the old button
+            if (oldBtn.parentNode) {
+                oldBtn.parentNode.replaceChild(newBtn, oldBtn);
             }
-
-            // Close panel when clicking outside
-            document.addEventListener('click', function(e) {
-                const mobileFilterBtn = document.getElementById('mobileFilterBtn');
-                if (mobileFilterPanel.classList.contains('show') && 
-                    !mobileFilterPanel.contains(e.target) && 
-                    e.target !== mobileFilterBtn && 
-                    !mobileFilterBtn.contains(e.target)) {
-                    mobileFilterPanel.classList.remove('show');
-                }
+            
+            // Add a clean click handler focused on just closing the panel
+            newBtn.addEventListener('click', function closeFilterPanel(e) {
+                // Stop event from bubbling up and triggering other handlers
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Log to confirm handler is running
+                console.log('Filter close button clicked - closing panel');
+                
+                // Force close the panel by removing the show class
+                mobileFilterPanel.classList.remove('show');
             });
         }
+        
+        // 2. Setup global click handler for clicks outside the panel
+        this._mobileFilterCloseHandler = function(e) {
+            // Only continue if panel is shown
+            if (!mobileFilterPanel.classList.contains('show')) return;
+            
+            // Close if clicked outside panel and not on filter button
+            if (!mobileFilterPanel.contains(e.target) && 
+                e.target !== mobileFilterBtn && 
+                !mobileFilterBtn.contains(e.target)) {
+                console.log('Clicked outside filter panel, closing');
+                mobileFilterPanel.classList.remove('show');
+            }
+        };
+        
+        // Use capturing phase for better event handling
+        document.addEventListener('click', this._mobileFilterCloseHandler, true);
+        
+        // 3. Set up toggle button with improved handling
+        if (mobileFilterBtn) {
+            // Replace existing listeners with a fresh one
+            const oldBtn = mobileFilterBtn;
+            const newBtn = oldBtn.cloneNode(true);
+            oldBtn.parentNode.replaceChild(newBtn, oldBtn);
+            
+            newBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Mobile filter button clicked - toggling panel');
+                mobileFilterPanel.classList.toggle('show');
+            });
+        }
+        
+        // 4. Add a failsafe mechanism - close on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && mobileFilterPanel.classList.contains('show')) {
+                console.log('Escape key pressed - closing filter panel');
+                mobileFilterPanel.classList.remove('show');
+            }
+        });
     },
 
     /**
-     * Set up condensed view toggle
+     * Set up condensed view toggle with improved reliability
      */
     setupCondensedView: function() {
         const desktopCompactToggle = document.getElementById('desktopCompactToggle');
         const condensedViewToggle = document.getElementById('condensedViewToggle');
         const recipesContainer = document.getElementById('recipesContainer');
 
-        // Track if user has manually changed the setting
+        // Reset tracking flag
         AppState.userChangedCompactSetting = false;
 
-        // Initialize from desktop toggle
-        if (desktopCompactToggle && recipesContainer) {
-            // Initialize state from toggle
-            AppState.isCondensedView = desktopCompactToggle.checked;
-            if (AppState.isCondensedView) {
-                recipesContainer.classList.add('compact-view');
-            } else {
-                recipesContainer.classList.remove('compact-view');
-            }
-
-            // Update on change
-            desktopCompactToggle.addEventListener('change', function() {
-                AppState.userChangedCompactSetting = true;
-                AppState.isCondensedView = this.checked;
-
-                // Keep mobile toggle in sync
-                if (condensedViewToggle) {
-                    condensedViewToggle.checked = this.checked;
-                }
-
-                if (this.checked) {
+        // Helper function to update the UI based on state
+        const updateCompactUI = (isCompact) => {
+            console.log('Setting compact view:', isCompact);
+            
+            // Update app state
+            AppState.isCondensedView = isCompact;
+            
+            // Update toggle states
+            if (desktopCompactToggle) desktopCompactToggle.checked = isCompact;
+            if (condensedViewToggle) condensedViewToggle.checked = isCompact;
+            
+            // Update container class
+            if (recipesContainer) {
+                if (isCompact) {
                     recipesContainer.classList.add('compact-view');
                 } else {
                     recipesContainer.classList.remove('compact-view');
                 }
+            }
+        };
+        
+        // Initialize based on screen size
+        const isSmallScreen = window.innerWidth <= 768;
+        if (isSmallScreen) {
+            // Always use compact view on mobile
+            updateCompactUI(true);
+        } else {
+            // Otherwise use the saved preference or default to expanded
+            updateCompactUI(AppState.isCondensedView || false);
+        }
+
+        // Desktop toggle event handler
+        if (desktopCompactToggle) {
+            desktopCompactToggle.addEventListener('click', function() {
+                AppState.userChangedCompactSetting = true;
+                updateCompactUI(this.checked);
             });
         }
 
-        // Initialize from mobile toggle
-        if (condensedViewToggle && recipesContainer) {
-            // Initialize state from mobile toggle
-            if (condensedViewToggle.checked) {
-                recipesContainer.classList.add('compact-view');
-                AppState.isCondensedView = true;
-            }
-
-            // Update on change
-            condensedViewToggle.addEventListener('change', function() {
+        // Mobile toggle event handler
+        if (condensedViewToggle) {
+            condensedViewToggle.addEventListener('click', function() {
                 AppState.userChangedCompactSetting = true;
-                AppState.isCondensedView = this.checked;
-
-                // Keep desktop toggle in sync
-                if (desktopCompactToggle) {
-                    desktopCompactToggle.checked = this.checked;
-                }
-
-                if (this.checked) {
-                    recipesContainer.classList.add('compact-view');
-                } else {
-                    recipesContainer.classList.remove('compact-view');
-                }
+                updateCompactUI(this.checked);
             });
         }
     },
@@ -1089,6 +1228,38 @@ const UI = {
     },
 
     /**
+     * Setup desktop navigation buttons
+     */
+    setupDesktopNavButtons: function(recipe) {
+        // Get the next and previous buttons
+        const nextBtn = document.querySelector('.modal-footer .next-btn');
+        const prevBtn = document.querySelector('.modal-footer .prev-btn');
+        
+        if (!nextBtn || !prevBtn) return;
+        
+        // Remove any existing event listeners to avoid duplicates
+        const newNextBtn = nextBtn.cloneNode(true);
+        const newPrevBtn = prevBtn.cloneNode(true);
+        
+        if (nextBtn.parentNode) {
+            nextBtn.parentNode.replaceChild(newNextBtn, nextBtn);
+        }
+        
+        if (prevBtn.parentNode) {
+            prevBtn.parentNode.replaceChild(newPrevBtn, prevBtn);
+        }
+        
+        // Add event listeners for navigation
+        newNextBtn.addEventListener('click', () => this.navigateRecipes('next'));
+        newPrevBtn.addEventListener('click', () => this.navigateRecipes('prev'));
+        
+        // Show or hide buttons based on available recipes
+        const shouldShowNavButtons = AppState.filteredRecipes.length > 1;
+        newNextBtn.style.display = shouldShowNavButtons ? 'block' : 'none';
+        newPrevBtn.style.display = shouldShowNavButtons ? 'block' : 'none';
+    },
+
+    /**
      * Set up all event listeners
      */
     setupEventListeners: function() {
@@ -1232,21 +1403,50 @@ const UI = {
 
         // Print buttons
         const printBtn = document.querySelector('.print-btn');
-        const mobilePrintBtn = document.querySelector('.mobile-print-btn');
         
-        const handlePrint = function(e) {
+        // Track if click is in progress to prevent duplicate firing
+        let printClickInProgress = false;
+        
+        const debouncedPrint = function(e) {
+            // Prevent default behaviors
             e.preventDefault();
-            if (AppState.currentRecipe) {
-                PrintHandler.printRecipe(AppState.currentRecipe);
+            e.stopPropagation();
+            
+            // If already handling a click, ignore
+            if (printClickInProgress) return;
+            
+            // Set flag to prevent duplicate firing
+            printClickInProgress = true;
+            
+            // Visual feedback for the button
+            if (this.classList) {
+                this.classList.add('button-pressed');
             }
+            
+            // Trigger print with small delay
+            setTimeout(() => {
+                if (AppState.currentRecipe) {
+                    PrintHandler.printRecipe(AppState.currentRecipe);
+                }
+                
+                // Reset button appearance
+                if (this.classList) {
+                    this.classList.remove('button-pressed');
+                }
+                
+                // Allow another click after a delay
+                setTimeout(() => {
+                    printClickInProgress = false;
+                }, 1000);
+            }, 50);
         };
 
         if (printBtn) {
-            printBtn.addEventListener('click', handlePrint);
-        }
-        
-        if (mobilePrintBtn) {
-            mobilePrintBtn.addEventListener('click', handlePrint);
+            // Remove any existing listeners first
+            printBtn.removeEventListener('click', handlePrint);
+            
+            // Add single event listener for all clicks
+            printBtn.addEventListener('click', debouncedPrint);
         }
 
         // Sort dropdown
@@ -1269,30 +1469,41 @@ const UI = {
             });
         }
 
-        // Mobile sort options
+        // Mobile sort options - FIX EVENT HANDLERS
         const mobileSortOptions = document.querySelectorAll('.mobile-sort-option');
         if (mobileSortOptions.length) {
+            // First remove any existing event handlers to prevent duplication
             mobileSortOptions.forEach(option => {
-                option.addEventListener('click', function() {
-                    if (!this.classList.contains('active')) {
+                const newOption = option.cloneNode(true);
+                if (option.parentNode) {
+                    option.parentNode.replaceChild(newOption, option);
+                }
+                
+                // Add fresh event listener with proper scope
+                newOption.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    if (!newOption.classList.contains('active')) {
                         // Update UI
                         mobileSortOptions.forEach(opt => opt.classList.remove('active'));
-                        this.classList.add('active');
-
-                        // Update sort state
-                        AppState.sortMethod = this.dataset.sort;
-
+                        newOption.classList.add('active');
+                        
+                        // Get the sort method directly from the clicked button
+                        const sortMethod = newOption.dataset.sort;
+                        console.log('Mobile sort button clicked:', sortMethod);
+                        
+                        // Update AppState
+                        AppState.sortMethod = sortMethod;
+                        
                         // Sync with desktop dropdown
+                        const sortSelect = document.getElementById('sort-select');
                         if (sortSelect) {
-                            sortSelect.value = AppState.sortMethod;
+                            sortSelect.value = sortMethod;
                         }
-
-                        // Update recipe display
-                        if (window.RecipeAnimations) {
-                            window.RecipeAnimations.transitionCards(() => UI.displayRecipes());
-                        } else {
-                            UI.displayRecipes();
-                        }
+                        
+                        // Force recipe display update
+                        this.displayRecipes();
                     }
                 });
             });
@@ -1372,8 +1583,128 @@ const UI = {
                 }
             });
         }
+
+        // Navigation buttons in modal footer - ensure they work
+        document.addEventListener('click', function(e) {
+            // Next button handling
+            if (e.target.matches('.next-btn') || e.target.closest('.next-btn')) {
+                UI.navigateRecipes('next');
+            }
+            
+            // Previous button handling
+            if (e.target.matches('.prev-btn') || e.target.closest('.prev-btn')) {
+                UI.navigateRecipes('prev');
+            }
+        });
     }
 };
+
+// Fix for sorting functionality
+function initSortingControls() {
+    // Desktop sorting
+    const sortSelect = document.getElementById('sort-select');
+    if (sortSelect) {
+        sortSelect.addEventListener('change', function() {
+            sortRecipes(this.value);
+        });
+    }
+
+    // Mobile sorting
+    const mobileSortOptions = document.querySelectorAll('.mobile-sort-option');
+    mobileSortOptions.forEach(option => {
+        option.addEventListener('click', function() {
+            // Remove active class from all options
+            mobileSortOptions.forEach(btn => btn.classList.remove('active'));
+            
+            // Add active class to clicked option
+            this.classList.add('active');
+            
+            // Get sort value and trigger sort
+            const sortValue = this.getAttribute('data-sort');
+            
+            // Update desktop dropdown to match if it exists
+            if (sortSelect) {
+                sortSelect.value = sortValue;
+            }
+            
+            sortRecipes(sortValue);
+        });
+    });
+}
+
+// Sort recipes based on selected sort option
+function sortRecipes(sortOption) {
+    const container = document.getElementById('recipesContainer');
+    const recipeCards = Array.from(container.querySelectorAll('.recipe-card'));
+    
+    if (recipeCards.length === 0) return;
+    
+    // Remove any loading or no results elements from the array
+    const filteredCards = recipeCards.filter(card => !card.classList.contains('loading-state') && !card.classList.contains('no-results-wrapper'));
+    
+    filteredCards.sort((a, b) => {
+        // Default sort returns to original order based on data-index
+        if (sortOption === 'default') {
+            return parseInt(a.getAttribute('data-index')) - parseInt(b.getAttribute('data-index'));
+        }
+        
+        // Sort by recipe name (A-Z)
+        else if (sortOption === 'alpha-asc') {
+            const titleA = a.querySelector('.recipe-title').textContent.toLowerCase();
+            const titleB = b.querySelector('.recipe-title').textContent.toLowerCase();
+            return titleA.localeCompare(titleB);
+        }
+        
+        // Sort by recipe name (Z-A)
+        else if (sortOption === 'alpha-desc') {
+            const titleA = a.querySelector('.recipe-title').textContent.toLowerCase();
+            const titleB = b.querySelector('.recipe-title').textContent.toLowerCase();
+            return titleB.localeCompare(titleA);
+        }
+        
+        // Sort by author
+        else if (sortOption === 'author') {
+            const authorA = a.querySelector('.author').textContent.replace('By ', '').toLowerCase();
+            const authorB = b.querySelector('.author').textContent.replace('By ', '').toLowerCase();
+            return authorA.localeCompare(authorB);
+        }
+        
+        // Sort by category
+        else if (sortOption === 'category') {
+            const categoryA = a.getAttribute('data-category').toLowerCase();
+            const categoryB = b.getAttribute('data-category').toLowerCase();
+            return categoryA.localeCompare(categoryB);
+        }
+        
+        return 0;
+    });
+    
+    // Update the DOM with sorted cards
+    const loadingState = container.querySelector('#loadingState');
+    const noResults = container.querySelector('#noResultsContainer');
+    
+    // Clear the container
+    container.innerHTML = '';
+    
+    // Re-add the cards in sorted order
+    filteredCards.forEach(card => {
+        container.appendChild(card);
+    });
+    
+    // Re-add loading and no results elements if they existed
+    if (loadingState) container.appendChild(loadingState);
+    if (noResults) container.appendChild(noResults);
+}
+
+// Make sure to call this function during initialization
+document.addEventListener('DOMContentLoaded', function() {
+    // ...existing DOMContentLoaded code...
+    
+    // Initialize sorting controls
+    initSortingControls();
+    
+    // ...rest of existing code...
+});
 
 // Initialize application when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {

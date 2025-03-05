@@ -1,0 +1,50 @@
+/**
+ * Desktop-specific fixes for recipe book
+ * These styles only apply to desktop (>768px) and don't affect mobile
+ */
+
+@media (min-width: 769px) {
+    /* Fix modal print button appearance and hover */
+    .modal-footer .print-btn {
+        cursor: pointer;
+        position: relative;
+        transition: all 0.2s ease;
+    }
+    
+    .modal-footer .print-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .modal-footer .print-btn:active {
+        transform: translateY(-1px);
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .modal-footer .print-btn.button-pressed {
+        transform: translateY(-1px);
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Fix compact view grid layout */  
+    .compact-view {
+        grid-template-columns: repeat(auto-fill, minmax(600px, 1fr)) !important;
+        gap: 20px;
+    }
+    
+    .compact-view .recipe-card {
+        display: grid !important;
+        grid-template-columns: 40% 60% !important;
+        min-height: 160px;
+    }
+    
+    /* Fix compact view card hover */
+    .compact-view .recipe-card:hover {
+        transform: translateY(-5px) !important;
+    }
+    
+    /* Fix heading sizes in compact view */
+    .compact-view .recipe-title {
+        font-size: 1.1rem !important;
+    }
+}

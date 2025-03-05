@@ -37,3 +37,47 @@
     touch-action: pan-y; /* Allow vertical touch scrolling */
   }
 }
+
+/**
+ * Modal and filter fixes
+ * Ensuring filters and modals work correctly
+ */
+
+/* General fixes for filter panel */
+#mobileFilterPanel.show {
+  transform: translate(-50%, 0) !important;
+  z-index: 999 !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Fix for compact view */
+.cards-container.compact-view {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+}
+
+.compact-view .recipe-card {
+  display: grid !important;
+  grid-template-columns: 40% 60% !important; 
+}
+
+/* Helper classes for diagnosing issues */
+.debug-highlight {
+  outline: 2px solid red !important;
+  position: relative;
+}
+
+.debug-highlight::after {
+  content: attr(class);
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  background: rgba(255,0,0,0.8);
+  color: white;
+  padding: 2px 5px;
+  font-size: 10px;
+  white-space: nowrap;
+  z-index: 9999;
+}

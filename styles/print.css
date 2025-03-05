@@ -380,3 +380,127 @@
         margin: 1.5cm 1cm;
     }
 }
+
+/**
+ * Print Styles
+ * Dedicated styles for recipe printing
+ */
+
+@media print {
+    /* Hide all page elements except the print container */
+    body * {
+        visibility: hidden;
+    }
+    
+    /* Only display the modal content when printing */
+    .modal-content, .modal-content * {
+        visibility: visible;
+    }
+    
+    /* Reset modal positioning for print */
+    .modal-content {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        background: white !important;
+        color: black !important;
+        box-shadow: none !important;
+    }
+    
+    /* Remove unnecessary elements */
+    .modal-footer, .close, .copy-ingredients-btn, 
+    .mobile-print-btn, .touch-indicator, .swipe-hint {
+        display: none !important;
+    }
+    
+    /* Style recipe elements for clean printing */
+    .modal-header {
+        background: white !important;
+        color: black !important;
+        padding: 0 !important;
+        margin-bottom: 0.5in !important;
+    }
+    
+    .modal-title {
+        color: black !important;
+        font-size: 24pt !important;
+        margin: 0 0 10pt 0 !important;
+    }
+    
+    .modal-author {
+        color: #333 !important;
+        font-size: 14pt !important;
+    }
+    
+    .modal-body {
+        padding: 0 !important;
+    }
+    
+    .recipe-preview-container {
+        border: none !important;
+        margin: 20pt 0 !important;
+        padding: 0 !important;
+    }
+    
+    .recipe-preview-text {
+        font-style: italic !important;
+        color: #333 !important;
+        border-left: 4pt solid #ccc !important;
+        padding-left: 10pt !important;
+    }
+    
+    .ingredients-title-container {
+        border: none !important;
+        padding: 0 !important;
+        margin: 20pt 0 10pt 0 !important;
+    }
+    
+    .ingredients-title, .instructions-title {
+        color: black !important;
+        font-size: 18pt !important;
+        border-bottom: 1pt solid #333 !important;
+        padding-bottom: 5pt !important;
+    }
+    
+    .ingredients-title::before, .instructions-title::before {
+        display: none !important;
+    }
+    
+    .ingredients-list li, .instructions-list li {
+        background: transparent !important;
+        padding: 6pt 0 6pt 0 !important;
+        color: black !important;
+        page-break-inside: avoid !important;
+        font-size: 12pt !important;
+        margin-bottom: 6pt !important;
+    }
+    
+    .ingredients-list li::before {
+        color: black !important;
+        font-size: 14pt !important;
+    }
+    
+    .instructions-list li::before {
+        background: #333 !important;
+    }
+    
+    /* Page break controls */
+    h1, h2, h3 {
+        page-break-after: avoid !important;
+    }
+    
+    .ingredients-list, .instructions-list {
+        page-break-before: avoid !important;
+    }
+    
+    li {
+        page-break-inside: avoid !important;
+    }
+    
+    /* Set page margins */
+    @page {
+        margin: 0.75in 0.5in;
+        size: auto;
+    }
+}

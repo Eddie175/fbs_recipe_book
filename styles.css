@@ -707,7 +707,7 @@ h1 {
 .mobile-sort-option.active {
     background-color: var(--primary);
     color: white;
-    border-color: var(--primary);
+    border-color: var (--primary);
 }
 
 [data-theme="dark"] .mobile-sort-interface {
@@ -1352,6 +1352,43 @@ h1 {
     margin-top: 12px;
 }
 
+/* Fix compact view grid layout for desktop */
+@media (min-width: 769px) {
+    /* Fix the grid layout for compact view on desktop */
+    .compact-view {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fill, minmax(600px, 1fr)) !important;
+        gap: 20px !important;
+        width: 100% !important;
+    }
+    
+    /* Ensure each card has the correct internal layout */
+    .compact-view .recipe-card {
+        display: grid !important;
+        grid-template-columns: 40% 60% !important;
+        min-height: 160px !important;
+        width: 100% !important;
+        margin: 0 !important;
+    }
+    
+    /* Better transitions for compact view */
+    .compact-view.view-mode-changed .recipe-card {
+        transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1) !important;
+    }
+    
+    /* Improve card hover effect in compact view */
+    .compact-view .recipe-card:hover {
+        transform: translateY(-5px) !important;
+    }
+}
+
+/* Override the mobile-specific grid layout on desktop */
+@media (max-width: 768px) {
+    .compact-view {
+        grid-template-columns: 1fr;
+    }
+}
+
 /*=================================
   6. Recipe Modal/Dialog
 =================================*/
@@ -1754,7 +1791,7 @@ h1 {
 .print-btn {
     padding: 12px 24px;
     background: rgba(255, 255, 255, 0.85);
-    color: var(--primary-dark);
+    color: var (--primary-dark);
     border: none;
     border-radius: var(--border-radius-button);
     cursor: pointer;
@@ -2223,7 +2260,7 @@ button[onclick*="print"] {
 
     .modal-footer .next-btn {
         padding: 12px 25px;
-        background: var(--primary);
+        background: var (--primary);
         color: white;
         border: none;
         border-radius: var(--border-radius-button);
@@ -2628,7 +2665,7 @@ button[onclick*="print"] {
 
     .instructions-list li:hover::before {
         transform: translateY(-50%) scale(1.1);
-        box-shadow: 0 4px 8px rgba(0, 119, 217, 0.3);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     }
     
     /* Optimize mobile list styling */
@@ -2795,6 +2832,13 @@ button[onclick*="print"] {
         transform: translateY(-3px);
     }
 }
+
+@media (min-width: 768px) {
+    .swipe-hint {
+        display: none;
+    }
+}
+
 
 /* Mobile height optimization */
 @media (max-height: 667px) {
