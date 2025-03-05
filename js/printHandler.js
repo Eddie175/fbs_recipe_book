@@ -26,8 +26,11 @@ const PrintHandler = {
         this.showPrintingFeedback();
         
         // Detect browser environment to use appropriate print method
-        if (this.isChromeOnMobile()) {
-            // Use direct approach for Chrome on mobile
+        if (this.isChromeOnIOS()) {
+            // Special handling for Chrome on iOS
+            this.printWithIOSChromeApproach(recipe);
+        } else if (this.isChromeOnMobile()) {
+            // Use direct approach for Chrome on other mobile platforms
             this.printWithDirectApproach(recipe);
         } else {
             // Use isolated frame for other browsers
@@ -550,6 +553,255 @@ const PrintHandler = {
      */
     isChromeOnMobile: function() {
         return (this.isChrome() && (this.isIOS() || this.isAndroid()));
+    },
+
+    /**
+     * Check specifically for Chrome on iOS devices
+     */
+    isChromeOnIOS: function() {
+        return this.isChrome() && this.isIOS() && 
+               // Additional check for CriOS (Chrome iOS)
+               (/CriOS/i.test(navigator.userAgent) || /FxiOS/i.test(navigator.userAgent));
+    },
+
+    /**
+     * Special print handler for Chrome on iOS
+     * iOS Chrome requires different handling due to its unique print dialog behavior
+     */
+    printWithIOSChromeApproach: function(recipe) {
+        // Save original page content
+        const originalContent = document.body.innerHTML;
+        const originalBodyStyle = document.body.getAttribute('style') || '';
+        const originalScrollPos = window.scrollY;
+        
+        try {
+            // Prepare print-friendly content
+            const printContent = `
+                <div id="ios-chrome-print-view" style="
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    background: white;
+                    color: black;
+                    padding: 20px;
+                    box-sizing: border-box;
+                    font-family: -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+                    z-index: 999999;
+                    min-height: 100%;
+                ">
+                    <div style="position: fixed; top: 10px; right: 10px; z-index: 9999999;">
+                        <button id="ios-print-close" style="
+                            background: #ff4444;
+                            color: white;
+                            border: none;
+                            padding: 8px 16px;
+                            border-radius: 20px;
+                            font-weight: bold;
+                            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+                        ">Close</button>
+                    </div>
+                    
+                    <div style="
+                        position: fixed; 
+                        bottom: 20px; 
+                        left: 50%; 
+                        transform: translateX(-50%);
+                        background: rgba(0,0,0,0.8);
+                        color: white;
+                        padding: 12px 20px;
+                        border-radius: 25px;
+                        font-size: 14px;
+                        max-width: 80%;
+                        text-align: center;
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                        z-index: 9999999;
+                    ">
+                        Tap <b>Share</b> icon → <b>Print</b>
+                    </div>
+                    
+                    <div style="margin-top: 60px;">
+                        <h1 style="
+                            font-size: 24px;
+                            margin-bottom: 10px;
+                            color: #0077d9;
+                        ">${recipe.title}</h1>
+                        
+                        <p style="
+                            font-style: italic;
+                            margin-bottom: 15px;
+                            font-size: 16px;
+                            color: #666;
+                        ">By ${recipe.author}</p>
+                        
+                        <div style="
+                            display: inline-block;
+                            background: #f0f8ff; 
+                            color: #0077d9;
+                            padding: 5px 12px;
+                            border-radius: 15px;
+                            font-size: 14px;
+                            margin-bottom: 20px;
+                            border: 1px solid #0077d9;
+                        ">${this.getCategoryName(recipe.category)}</div>
+                        
+                        ${recipe.preview ? `
+                            <div style="
+                                font-style: italic;
+                                margin: 20px 0;
+                                padding: 15px;
+                                background: #f9f9f9;
+                                border-left: 4px solid #0077d9;
+                                color: #666;
+                            ">${recipe.preview}</div>
+                        ` : ''}
+                        
+                        <h2 style="
+                            color: #0077d9;
+                            font-size: 20px;
+                            margin-top: 30px;
+                            border-bottom: 2px solid #0077d9;
+                            padding-bottom: 8px;
+                        ">Ingredients</h2>
+                        
+                        <ul style="
+                            padding-left: 20px;
+                            margin-bottom: 30px;
+                        ">
+                            ${recipe.ingredients.map(ingredient => 
+                                `<li style="margin-bottom: 8px;">${ingredient}</li>`
+                            ).join('')}
+                        </ul>
+                        
+                        <h2 style="
+                            color: #0077d9;
+                            font-size: 20px;
+                            margin-top: 30px;
+                            border-bottom: 2px solid #0077d9;
+                            padding-bottom: 8px;
+                        ">Instructions</h2>
+                        
+                        <ol style="
+                            padding-left: 20px;
+                            margin-bottom: 30px;
+                        ">
+                            ${recipe.instructions.map((instruction, index) => 
+                                `<li style="margin-bottom: 12px;">${instruction}</li>`
+                            ).join('')}
+                        </ol>
+                        
+                        <div style="
+                            text-align: center;
+                            margin-top: 40px;
+                            padding-top: 20px;
+                            border-top: 1px solid #ddd;
+                            color: #999;
+                            font-size: 14px;
+                        ">Printed from FBS Employee Recipe Book</div>
+                    </div>
+                </div>
+            `;
+            
+            // Replace page content
+            document.body.style.overflow = 'hidden';
+            document.body.style.position = 'relative';
+            document.body.innerHTML = printContent;
+            
+            // Set up close button functionality
+            document.getElementById('ios-print-close').addEventListener('click', () => {
+                // Restore original content
+                document.body.innerHTML = originalContent;
+                document.body.setAttribute('style', originalBodyStyle);
+                window.scrollTo(0, originalScrollPos);
+                
+                // Reinitialize the app if needed
+                if (typeof UI !== 'undefined' && UI.init) {
+                    UI.init();
+                }
+                
+                this.isPrintingInProgress = false;
+            });
+            
+            // Add custom print stylesheet optimized for iOS Chrome
+            const printStyle = document.createElement('style');
+            printStyle.id = 'ios-chrome-print-style';
+            printStyle.textContent = `
+                @media print {
+                    #ios-print-close, 
+                    div[style*="position: fixed"] {
+                        display: none !important;
+                    }
+                    
+                    body {
+                        padding: 0 !important;
+                        margin: 0 !important;
+                    }
+                    
+                    #ios-chrome-print-view {
+                        position: static !important;
+                        padding: 0.5in !important;
+                    }
+                    
+                    h1, h2 {
+                        page-break-after: avoid;
+                    }
+                    
+                    ul, ol {
+                        page-break-before: avoid;
+                    }
+                    
+                    li {
+                        page-break-inside: avoid;
+                    }
+                }
+            `;
+            document.head.appendChild(printStyle);
+            
+        } catch (error) {
+            console.error('iOS Chrome print error:', error);
+            
+            // Restore original content
+            document.body.innerHTML = originalContent;
+            document.body.setAttribute('style', originalBodyStyle);
+            window.scrollTo(0, originalScrollPos);
+            
+            // Display error toast
+            this.showErrorToast('Printing failed. Please try again.');
+            
+            // Reset print state
+            this.isPrintingInProgress = false;
+        }
+    },
+    
+    /**
+     * Show error toast message
+     */
+    showErrorToast: function(message) {
+        const toast = document.createElement('div');
+        toast.style.position = 'fixed';
+        toast.style.bottom = '20px';
+        toast.style.left = '50%';
+        toast.style.transform = 'translateX(-50%)';
+        toast.style.backgroundColor = 'rgba(255, 68, 68, 0.9)';
+        toast.style.color = 'white';
+        toast.style.padding = '12px 20px';
+        toast.style.borderRadius = '20px';
+        toast.style.fontWeight = '500';
+        toast.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.2)';
+        toast.style.zIndex = '10000';
+        toast.style.textAlign = 'center';
+        toast.textContent = message;
+        
+        document.body.appendChild(toast);
+        
+        // Remove after 3 seconds
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(-50%) translateY(20px)';
+            toast.style.transition = 'all 0.3s ease';
+            
+            setTimeout(() => document.body.removeChild(toast), 300);
+        }, 3000);
     }
 };
 
