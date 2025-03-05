@@ -727,6 +727,19 @@ const UI = {
         const modal = document.getElementById('recipeModal');
         if (!modal) return;
 
+        // Move focus to a safe element outside the modal
+        // Find any focused element inside the modal
+        const focusedElement = document.activeElement;
+        if (focusedElement && modal.contains(focusedElement)) {
+            // Find something safe to focus on
+            const safeToFocus = document.querySelector('.filter-btn.active') || 
+                               document.querySelector('#search') || 
+                               document.querySelector('h1');
+            if (safeToFocus) {
+                safeToFocus.focus();
+            }
+        }
+
         // Re-enable body scrolling
         preventBodyScroll(false);
 
@@ -739,11 +752,10 @@ const UI = {
             setTimeout(() => {
                 modal.style.display = 'none';
                 modal.classList.remove('hide');
+                // Set aria-hidden after animation completes
+                modal.setAttribute('aria-hidden', 'true');
             }, 300);
         }
-
-        // Update accessibility attribute
-        modal.setAttribute('aria-hidden', 'true');
     },
 
     /**
@@ -898,6 +910,18 @@ const UI = {
             document.removeEventListener('click', this._mobileFilterCloseHandler);
         }
         
+        if (this._mobileFilterScrollHandler) {
+            window.removeEventListener('scroll', this._mobileFilterScrollHandler);
+        }
+        
+        if (this._mobileFilterFocusHandler) {
+            document.removeEventListener('focusin', this._mobileFilterFocusHandler);
+        }
+        
+        if (this._mobileFilterTouchHandler) {
+            document.removeEventListener('touchstart', this._mobileFilterTouchHandler);
+        }
+        
         // 1. Set up the close button with a direct, simple handler
         if (panelCloseBtn) {
             // Remove any existing listeners by cloning and replacing
@@ -918,9 +942,6 @@ const UI = {
                 e.preventDefault();
                 e.stopPropagation();
                 
-                // Log to confirm handler is running
-                console.log('Filter close button clicked - closing panel');
-                
                 // Force close the panel by removing the show class
                 mobileFilterPanel.classList.remove('show');
             });
@@ -940,10 +961,48 @@ const UI = {
             }
         };
         
+        // 3. Setup scroll handler to close filter panel when scrolling
+        this._mobileFilterScrollHandler = function() {
+            if (mobileFilterPanel.classList.contains('show')) {
+                mobileFilterPanel.classList.remove('show');
+            }
+        };
+        
+        // 4. Setup focus handler to close panel when tabbing outside
+        this._mobileFilterFocusHandler = function(e) {
+            if (!mobileFilterPanel.classList.contains('show')) return;
+            
+            if (!mobileFilterPanel.contains(e.target)) {
+                mobileFilterPanel.classList.remove('show');
+            }
+        };
+        
+        // 5. Setup touch handler for touchstart events outside panel
+        this._mobileFilterTouchHandler = function(e) {
+            if (!mobileFilterPanel.classList.contains('show')) return;
+            
+            if (!mobileFilterPanel.contains(e.target) && 
+                e.target !== mobileFilterBtn && 
+                !mobileFilterBtn.contains(e.target)) {
+                mobileFilterPanel.classList.remove('show');
+            }
+        };
+        
         // Use capturing phase for better event handling
         document.addEventListener('click', this._mobileFilterCloseHandler, true);
+        window.addEventListener('scroll', this._mobileFilterScrollHandler, { passive: true });
+        document.addEventListener('focusin', this._mobileFilterFocusHandler, true);
+        document.addEventListener('touchstart', this._mobileFilterTouchHandler, { passive: true });
         
-        // 3. Set up toggle button with improved handling
+        // 6. Add a failsafe mechanism - close on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && mobileFilterPanel.classList.contains('show')) {
+                console.log('Escape key pressed - closing filter panel');
+                mobileFilterPanel.classList.remove('show');
+            }
+        });
+        
+        // 7. Add setup for the filter button with improved handling
         if (mobileFilterBtn) {
             // Replace existing listeners with a fresh one
             const oldBtn = mobileFilterBtn;
@@ -957,14 +1016,6 @@ const UI = {
                 mobileFilterPanel.classList.toggle('show');
             });
         }
-        
-        // 4. Add a failsafe mechanism - close on escape key
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && mobileFilterPanel.classList.contains('show')) {
-                console.log('Escape key pressed - closing filter panel');
-                mobileFilterPanel.classList.remove('show');
-            }
-        });
     },
 
     /**
@@ -1442,11 +1493,14 @@ const UI = {
         };
 
         if (printBtn) {
-            // Remove any existing listeners first
-            printBtn.removeEventListener('click', handlePrint);
+            // Instead of trying to remove non-existent handler, safely replace the element
+            const newPrintBtn = printBtn.cloneNode(true);
+            if (printBtn.parentNode) {
+                printBtn.parentNode.replaceChild(newPrintBtn, printBtn);
+            }
             
-            // Add single event listener for all clicks
-            printBtn.addEventListener('click', debouncedPrint);
+            // Add click handler to the new button
+            newPrintBtn.addEventListener('click', debouncedPrint);
         }
 
         // Sort dropdown
@@ -1469,41 +1523,56 @@ const UI = {
             });
         }
 
-        // Mobile sort options - FIX EVENT HANDLERS
+        // Mobile sort options - Fix multiple selection issue
         const mobileSortOptions = document.querySelectorAll('.mobile-sort-option');
         if (mobileSortOptions.length) {
-            // First remove any existing event handlers to prevent duplication
+            // First remove any existing event handlers by replacing all buttons
             mobileSortOptions.forEach(option => {
                 const newOption = option.cloneNode(true);
                 if (option.parentNode) {
                     option.parentNode.replaceChild(newOption, option);
                 }
-                
-                // Add fresh event listener with proper scope
-                newOption.addEventListener('click', (e) => {
+            });
+            
+            // Re-query the new buttons
+            const newMobileSortOptions = document.querySelectorAll('.mobile-sort-option');
+            
+            // Add fresh event listeners with proper selection handling
+            newMobileSortOptions.forEach(option => {
+                option.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     
-                    if (!newOption.classList.contains('active')) {
-                        // Update UI
-                        mobileSortOptions.forEach(opt => opt.classList.remove('active'));
-                        newOption.classList.add('active');
-                        
-                        // Get the sort method directly from the clicked button
-                        const sortMethod = newOption.dataset.sort;
-                        console.log('Mobile sort button clicked:', sortMethod);
-                        
-                        // Update AppState
-                        AppState.sortMethod = sortMethod;
-                        
-                        // Sync with desktop dropdown
-                        const sortSelect = document.getElementById('sort-select');
-                        if (sortSelect) {
-                            sortSelect.value = sortMethod;
-                        }
-                        
-                        // Force recipe display update
-                        this.displayRecipes();
+                    // Remove active class from ALL options first
+                    newMobileSortOptions.forEach(btn => btn.classList.remove('active'));
+                    
+                    // Add active class only to clicked option
+                    option.classList.add('active');
+                    
+                    // Get sort method from button's data attribute
+                    const sortMethod = option.dataset.sort;
+                    console.log('Mobile sort changed to:', sortMethod);
+                    
+                    // Update AppState
+                    AppState.sortMethod = sortMethod;
+                    
+                    // Sync with desktop dropdown
+                    const sortSelect = document.getElementById('sort-select');
+                    if (sortSelect) {
+                        sortSelect.value = sortMethod;
+                    }
+                    
+                    // Update recipe display
+                    if (window.RecipeAnimations) {
+                        window.RecipeAnimations.transitionCards(() => UI.displayRecipes());
+                    } else {
+                        UI.displayRecipes();
+                    }
+                    
+                    // Close mobile filter panel if open
+                    const mobileFilterPanel = document.getElementById('mobileFilterPanel');
+                    if (mobileFilterPanel && mobileFilterPanel.classList.contains('show')) {
+                        mobileFilterPanel.classList.remove('show');
                     }
                 });
             });
@@ -1598,113 +1667,6 @@ const UI = {
         });
     }
 };
-
-// Fix for sorting functionality
-function initSortingControls() {
-    // Desktop sorting
-    const sortSelect = document.getElementById('sort-select');
-    if (sortSelect) {
-        sortSelect.addEventListener('change', function() {
-            sortRecipes(this.value);
-        });
-    }
-
-    // Mobile sorting
-    const mobileSortOptions = document.querySelectorAll('.mobile-sort-option');
-    mobileSortOptions.forEach(option => {
-        option.addEventListener('click', function() {
-            // Remove active class from all options
-            mobileSortOptions.forEach(btn => btn.classList.remove('active'));
-            
-            // Add active class to clicked option
-            this.classList.add('active');
-            
-            // Get sort value and trigger sort
-            const sortValue = this.getAttribute('data-sort');
-            
-            // Update desktop dropdown to match if it exists
-            if (sortSelect) {
-                sortSelect.value = sortValue;
-            }
-            
-            sortRecipes(sortValue);
-        });
-    });
-}
-
-// Sort recipes based on selected sort option
-function sortRecipes(sortOption) {
-    const container = document.getElementById('recipesContainer');
-    const recipeCards = Array.from(container.querySelectorAll('.recipe-card'));
-    
-    if (recipeCards.length === 0) return;
-    
-    // Remove any loading or no results elements from the array
-    const filteredCards = recipeCards.filter(card => !card.classList.contains('loading-state') && !card.classList.contains('no-results-wrapper'));
-    
-    filteredCards.sort((a, b) => {
-        // Default sort returns to original order based on data-index
-        if (sortOption === 'default') {
-            return parseInt(a.getAttribute('data-index')) - parseInt(b.getAttribute('data-index'));
-        }
-        
-        // Sort by recipe name (A-Z)
-        else if (sortOption === 'alpha-asc') {
-            const titleA = a.querySelector('.recipe-title').textContent.toLowerCase();
-            const titleB = b.querySelector('.recipe-title').textContent.toLowerCase();
-            return titleA.localeCompare(titleB);
-        }
-        
-        // Sort by recipe name (Z-A)
-        else if (sortOption === 'alpha-desc') {
-            const titleA = a.querySelector('.recipe-title').textContent.toLowerCase();
-            const titleB = b.querySelector('.recipe-title').textContent.toLowerCase();
-            return titleB.localeCompare(titleA);
-        }
-        
-        // Sort by author
-        else if (sortOption === 'author') {
-            const authorA = a.querySelector('.author').textContent.replace('By ', '').toLowerCase();
-            const authorB = b.querySelector('.author').textContent.replace('By ', '').toLowerCase();
-            return authorA.localeCompare(authorB);
-        }
-        
-        // Sort by category
-        else if (sortOption === 'category') {
-            const categoryA = a.getAttribute('data-category').toLowerCase();
-            const categoryB = b.getAttribute('data-category').toLowerCase();
-            return categoryA.localeCompare(categoryB);
-        }
-        
-        return 0;
-    });
-    
-    // Update the DOM with sorted cards
-    const loadingState = container.querySelector('#loadingState');
-    const noResults = container.querySelector('#noResultsContainer');
-    
-    // Clear the container
-    container.innerHTML = '';
-    
-    // Re-add the cards in sorted order
-    filteredCards.forEach(card => {
-        container.appendChild(card);
-    });
-    
-    // Re-add loading and no results elements if they existed
-    if (loadingState) container.appendChild(loadingState);
-    if (noResults) container.appendChild(noResults);
-}
-
-// Make sure to call this function during initialization
-document.addEventListener('DOMContentLoaded', function() {
-    // ...existing DOMContentLoaded code...
-    
-    // Initialize sorting controls
-    initSortingControls();
-    
-    // ...rest of existing code...
-});
 
 // Initialize application when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {

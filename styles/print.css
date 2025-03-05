@@ -30,7 +30,7 @@
     }
 
     /* Hide application UI */
-    body > *:not(.print-content) {
+    body > *:not(.print-content):not(#mobile-chrome-print-container) {
         display: none !important;
     }
 
@@ -53,7 +53,8 @@
     }
 
     /* Print content container */
-    .print-content {
+    .print-content,
+    #mobile-chrome-print-container {
         display: block !important;
         visibility: visible !important;
         position: relative !important;
@@ -62,6 +63,13 @@
         margin: 0 auto;
         padding: 0;
         background: none !important;
+    }
+    
+    /* Chrome-specific print container */
+    #mobile-chrome-print-container button,
+    #mobile-chrome-print-container [role="button"],
+    #mobile-chrome-print-container .printInstructions {
+        display: none !important;
     }
 
     .print-content-inner {

@@ -26,25 +26,44 @@
         box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
     }
     
-    /* Fix compact view grid layout */  
-    .compact-view {
-        grid-template-columns: repeat(auto-fill, minmax(600px, 1fr)) !important;
-        gap: 20px;
+    /* Fix compact view grid layout with stronger specificity */
+    body .cards-container.compact-view {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fill, minmax(450px, 1fr)) !important;
+        gap: 25px !important;
+        width: 100% !important;
     }
     
-    .compact-view .recipe-card {
+    /* Ensure each card has correct layout */
+    body .cards-container.compact-view .recipe-card {
         display: grid !important;
         grid-template-columns: 40% 60% !important;
-        min-height: 160px;
+        min-height: 160px !important;
+        width: 100% !important;
+        margin: 0 !important;
     }
     
     /* Fix compact view card hover */
-    .compact-view .recipe-card:hover {
+    body .cards-container.compact-view .recipe-card:hover {
         transform: translateY(-5px) !important;
     }
     
     /* Fix heading sizes in compact view */
-    .compact-view .recipe-title {
+    body .cards-container.compact-view .recipe-title {
         font-size: 1.1rem !important;
+    }
+    
+    /* Add a fix for wider screens to show more cards */
+    @media (min-width: 1200px) {
+        body .cards-container.compact-view {
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)) !important;
+        }
+    }
+    
+    /* Even more cards for extra wide screens */
+    @media (min-width: 1600px) {
+        body .cards-container.compact-view {
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)) !important;
+        }
     }
 }

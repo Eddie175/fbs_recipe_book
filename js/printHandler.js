@@ -25,8 +25,14 @@ const PrintHandler = {
         // Show visual feedback that printing is starting
         this.showPrintingFeedback();
         
-        // Complete isolation - use a dedicated print method that doesn't affect the DOM
-        this.printWithIsolatedFrame(recipe);
+        // Detect browser environment to use appropriate print method
+        if (this.isChromeOnMobile()) {
+            // Use direct approach for Chrome on mobile
+            this.printWithDirectApproach(recipe);
+        } else {
+            // Use isolated frame for other browsers
+            this.printWithIsolatedFrame(recipe);
+        }
         
         // Reset the printing flag after a timeout (in case something goes wrong)
         setTimeout(() => {
@@ -105,7 +111,7 @@ const PrintHandler = {
 
     /**
      * Print using a completely isolated iframe that won't affect the original DOM
-     * This is the key to preventing the ingredients header from disappearing
+     * This works well for desktop and Safari on iOS
      */
     printWithIsolatedFrame: function(recipe) {
         // First, clean up any existing print frames
@@ -150,13 +156,13 @@ const PrintHandler = {
             };
             
             // Set timeout based on device
-            const timeout = this.isIOS() ? 800 : (this.isAndroid() ? 400 : 200);
+            const timeout = this.isIOS() ? 800 : 300;
             
             // Listen for print completion in the iframe
             frameDoc.addEventListener('afterprint', handlePrintComplete);
             
             // Trigger print after content has loaded
-            const printTimeout = setTimeout(() => {
+            setTimeout(() => {
                 try {
                     if (this.isIOS()) {
                         printFrame.contentWindow.focus();
@@ -172,16 +178,160 @@ const PrintHandler = {
             }, timeout);
             
             // Safety cleanup timeout
-            const cleanupTimeout = setTimeout(() => {
+            setTimeout(() => {
                 this.isPrintingInProgress = false;
                 this.cleanupPrintFrames();
-                clearTimeout(printTimeout);
             }, 10000);
         } catch (error) {
             console.error("Error in print preparation:", error);
             this.isPrintingInProgress = false;
             this.cleanupPrintFrames();
         }
+    },
+
+    /**
+     * Print using a direct approach that works better for Chrome on mobile
+     * This creates a temporary visible div that Chrome can print
+     */
+    printWithDirectApproach: function(recipe) {
+        // Create a container to hold the print content
+        let printContainer = document.getElementById('mobile-chrome-print-container');
+        if (!printContainer) {
+            printContainer = document.createElement('div');
+            printContainer.id = 'mobile-chrome-print-container';
+            printContainer.className = 'print-content';
+            
+            // Position it absolutely but make it visible
+            printContainer.style.position = 'fixed';
+            printContainer.style.top = '0';
+            printContainer.style.left = '0';
+            printContainer.style.width = '100%';
+            printContainer.style.height = '100%';
+            printContainer.style.backgroundColor = '#ffffff';
+            printContainer.style.zIndex = '9999';
+            printContainer.style.overflow = 'auto';
+            printContainer.style.padding = '20px';
+            printContainer.style.boxSizing = 'border-box';
+            
+            document.body.appendChild(printContainer);
+        } else {
+            printContainer.innerHTML = '';
+        }
+        
+        // Create print inner container
+        const printContentInner = document.createElement('div');
+        printContentInner.className = 'print-content-inner';
+        printContainer.appendChild(printContentInner);
+        
+        // Add recipe title
+        const recipeTitle = document.createElement('h1');
+        recipeTitle.className = 'recipe-title';
+        recipeTitle.textContent = recipe.title;
+        printContentInner.appendChild(recipeTitle);
+        
+        // Add recipe meta
+        const recipeMeta = document.createElement('div');
+        recipeMeta.className = 'recipe-meta';
+        recipeMeta.innerHTML = `<span>By ${recipe.author}</span> • <span>${this.getCategoryName(recipe.category)}</span>`;
+        printContentInner.appendChild(recipeMeta);
+        
+        // Add recipe preview if present
+        if (recipe.preview) {
+            const recipePreview = document.createElement('div');
+            recipePreview.className = 'recipe-preview';
+            recipePreview.textContent = recipe.preview;
+            printContentInner.appendChild(recipePreview);
+        }
+        
+        // Add ingredients section
+        const ingredientsTitle = document.createElement('h2');
+        ingredientsTitle.className = 'ingredients-title';
+        ingredientsTitle.textContent = 'Ingredients';
+        printContentInner.appendChild(ingredientsTitle);
+        
+        const ingredientsList = document.createElement('ul');
+        ingredientsList.className = 'ingredients-list';
+        recipe.ingredients.forEach(ingredient => {
+            const li = document.createElement('li');
+            li.textContent = ingredient;
+            ingredientsList.appendChild(li);
+        });
+        printContentInner.appendChild(ingredientsList);
+        
+        // Add instructions section
+        const instructionsTitle = document.createElement('h2');
+        instructionsTitle.className = 'instructions-title';
+        instructionsTitle.textContent = 'Instructions';
+        printContentInner.appendChild(instructionsTitle);
+        
+        const instructionsList = document.createElement('ol');
+        instructionsList.className = 'instructions-list';
+        recipe.instructions.forEach(instruction => {
+            const li = document.createElement('li');
+            li.textContent = instruction;
+            instructionsList.appendChild(li);
+        });
+        printContentInner.appendChild(instructionsList);
+        
+        // Add close button for user to exit if print fails
+        const closeButton = document.createElement('button');
+        closeButton.textContent = '✕ Close';
+        closeButton.style.position = 'fixed';
+        closeButton.style.bottom = '20px';
+        closeButton.style.right = '20px';
+        closeButton.style.padding = '10px 15px';
+        closeButton.style.backgroundColor = '#ff4444';
+        closeButton.style.color = 'white';
+        closeButton.style.border = 'none';
+        closeButton.style.borderRadius = '5px';
+        closeButton.style.cursor = 'pointer';
+        closeButton.style.zIndex = '10000';
+        closeButton.onclick = () => {
+            this.cleanupDirectPrint();
+        };
+        printContainer.appendChild(closeButton);
+        
+        // Add print instructions for Chrome
+        const printInstructions = document.createElement('div');
+        printInstructions.style.position = 'fixed';
+        printInstructions.style.top = '10px';
+        printInstructions.style.right = '10px';
+        printInstructions.style.backgroundColor = 'rgba(0,0,0,0.7)';
+        printInstructions.style.color = 'white';
+        printInstructions.style.padding = '10px';
+        printInstructions.style.borderRadius = '5px';
+        printInstructions.style.fontSize = '14px';
+        printInstructions.style.zIndex = '10000';
+        printInstructions.style.maxWidth = '200px';
+        printInstructions.textContent = 'Tap the three dots in Chrome, then select "Share" and "Print"';
+        printContainer.appendChild(printInstructions);
+        
+        // Try automatic printing after a delay for compatible browsers
+        setTimeout(() => {
+            try {
+                window.print();
+                
+                // Some browsers will wait until print is done or canceled
+                // For others, we'll provide a timeout
+                setTimeout(() => {
+                    this.cleanupDirectPrint();
+                }, 5000);
+            } catch (e) {
+                console.log('Auto-print failed, waiting for manual print', e);
+                // Keep the view open for manual printing
+            }
+        }, 1000);
+    },
+    
+    /**
+     * Clean up direct print view
+     */
+    cleanupDirectPrint: function() {
+        const printContainer = document.getElementById('mobile-chrome-print-container');
+        if (printContainer) {
+            document.body.removeChild(printContainer);
+        }
+        this.isPrintingInProgress = false;
     },
     
     /**
@@ -204,19 +354,6 @@ const PrintHandler = {
     generatePrintTemplate: function(recipe) {
         if (!recipe) return '';
         
-        // Category name with proper formatting
-        const getCategoryName = function(categoryCode) {
-            const categories = {
-                'main': 'Main Dish',
-                'side': 'Side Dish',
-                'dessert': 'Dessert',
-                'breakfast': 'Breakfast',
-                'drink': 'Drink',
-                'soup': 'Soup'
-            };
-            return categories[categoryCode] || categoryCode;
-        };
-
         // Format ingredients list
         const ingredientsList = recipe.ingredients.map(ingredient => 
             `<li>${ingredient}</li>`
@@ -345,7 +482,7 @@ const PrintHandler = {
                     <h1>${recipe.title}</h1>
                     <div class="recipe-meta">
                         <div class="author">By ${recipe.author}</div>
-                        <div class="category">Category: ${getCategoryName(recipe.category)}</div>
+                        <div class="category">Category: ${this.getCategoryName(recipe.category)}</div>
                     </div>
                     
                     ${recipe.preview ? `<div class="preview">${recipe.preview}</div>` : ''}
@@ -363,6 +500,21 @@ const PrintHandler = {
             </body>
             </html>
         `;
+    },
+    
+    /**
+     * Get category name from code
+     */
+    getCategoryName: function(categoryCode) {
+        const categories = {
+            'main': 'Main Dish',
+            'side': 'Side Dish',
+            'dessert': 'Dessert',
+            'breakfast': 'Breakfast',
+            'drink': 'Drink',
+            'soup': 'Soup'
+        };
+        return categories[categoryCode] || categoryCode;
     },
     
     /**
@@ -384,6 +536,20 @@ const PrintHandler = {
      */
     isSafari: function() {
         return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    },
+    
+    /**
+     * Check if browser is Chrome
+     */
+    isChrome: function() {
+        return /chrome|chromium|crios/i.test(navigator.userAgent);
+    },
+    
+    /**
+     * Check specifically for Chrome on mobile devices
+     */
+    isChromeOnMobile: function() {
+        return (this.isChrome() && (this.isIOS() || this.isAndroid()));
     }
 };
 
